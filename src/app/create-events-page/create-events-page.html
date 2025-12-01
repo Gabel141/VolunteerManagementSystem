@@ -1,0 +1,45 @@
+<div class="container py-4">
+	<div class="row justify-content-start">
+		<div class="col-12 col-lg-10">
+			<div class="card">
+				<div class="card-body">
+					<h4 class="card-title mb-3">Create Event</h4>
+
+					<form (ngSubmit)="createEvent()" #eventForm="ngForm" novalidate>
+
+						<!-- Small top input (title) -->
+						<div class="mb-3" style="max-width:70%;">
+							<label for="title" class="form-label">Event Title</label>
+							<input id="title" name="title" class="form-control" required
+										 [(ngModel)]="eventTitle" placeholder="Community Cleanup" />
+						</div>
+
+						<!-- Indented second input -->
+						<div class="mb-3 ms-4" style="max-width:60%;">
+							<label for="subtitle" class="form-label">Short Subtitle</label>
+							<input id="subtitle" name="subtitle" class="form-control" [(ngModel)]="eventLocation" placeholder="Neighborhood Cleanup" />
+						</div>
+
+						<!-- Large textarea (main content) -->
+						<div class="mb-3" style="margin-left:0.5rem; margin-right:0.5rem;">
+							<label for="description" class="form-label">Description</label>
+							<textarea id="description" name="description" class="form-control" rows="6" [(ngModel)]="eventDescription" placeholder="Details about the event..."></textarea>
+						</div>
+
+						<!-- Bottom row: small input on left, button on right -->
+						<div class="d-flex align-items-center">
+							<div style="flex:1; max-width:40%;">
+								<label for="date" class="form-label visually-hidden">Date</label>
+								<input id="date" name="date" type="date" class="form-control" [(ngModel)]="eventDate" />
+							</div>
+							<div style="flex:0 0 auto; margin-left:auto;">
+								<button type="submit" class="btn btn-primary">Create</button>
+							</div>
+						</div>
+
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
