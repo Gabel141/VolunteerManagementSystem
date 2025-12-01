@@ -20,8 +20,6 @@ volunteerPassword = signal('');
 
 volunteers: any[] = [];
 
-
-
 constructor(private firestore: Firestore) {
 const volunteersCollection = collection(this.firestore, 'volunteers');
 collectionData(volunteersCollection, { idField: 'id' })
@@ -31,9 +29,16 @@ this.volunteers = data; // Assign to array so Angular detects changes
 }
 
 registerVolunteer() {
-if (this.volunteerName() && this.volunteerEmail() && this.volunteerPassword()) {
-const volunteersCollection = collection(this.firestore, 'volunteers');
-}
+  const name = this.volunteerName();
+  const email = this.volunteerEmail();
+  const password = this.volunteerPassword();
+  if (name && email && password) {
+    const volunteersCollection = collection(this.firestore, 'volunteers');
+    addDoc(volunteersCollection, {name, email, password});
+    this.volunteerName();
+    this.volunteerEmail();
+    this.volunteerPassword();
+  }
 }
 
 }
