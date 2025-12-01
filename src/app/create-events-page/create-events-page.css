@@ -1,0 +1,82 @@
+
+/* Create Events page styles (uses same palette variables above) */
+.card {
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 12px 30px rgba(40,54,24,0.06);
+	border: 1px solid rgba(40,54,24,0.06);
+}
+
+.card .card-body {
+	padding: 1.25rem;
+}
+
+.card-title {
+	color: var(--black-forest);
+	font-weight: 600;
+	margin-bottom: 0.75rem;
+}
+
+/* Top narrow input */
+.card .mb-3:first-of-type {
+	max-width: 70%;
+}
+
+/* Indented second input */
+.card .ms-4 {
+	margin-left: 1.5rem !important;
+	max-width: 60%;
+}
+
+/* Large textarea styling */
+.card textarea.form-control {
+	min-height: 160px;
+	border-radius: 6px;
+	resize: vertical;
+}
+
+/* Bottom row small input */
+.d-flex.align-items-center input.form-control[type="date"] {
+	max-width: 260px;
+	border-radius: 6px;
+}
+
+/* Buttons using palette */
+.btn-primary {
+	background: linear-gradient(180deg, var(--sunlit-clay), var(--copperwood));
+	border: none;
+	color: var(--cornsilk);
+	box-shadow: 0 6px 18px rgba(188,108,37,0.12);
+}
+
+.btn-primary:disabled {
+	opacity: 0.7;
+}
+
+.btn-outline-secondary {
+	border-color: var(--olive-leaf);
+	color: var(--olive-leaf);
+	background: transparent;
+}
+
+label {
+	color: var(--black-forest);
+	font-weight: 500;
+}
+
+/* Focus states consistent with palette */
+.card .form-control:focus {
+	border-color: var(--olive-leaf);
+	box-shadow: 0 0 0 0.18rem rgba(96,108,56,0.12);
+}
+
+@media (max-width: 576px) {
+	.card .mb-3:first-of-type,
+	.card .ms-4 {
+		max-width: 100%;
+		margin-left: 0 !important;
+	}
+	.d-flex.align-items-center input.form-control[type="date"] { max-width: 100%; }
+}
+
+
