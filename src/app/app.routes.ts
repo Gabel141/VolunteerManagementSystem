@@ -10,6 +10,6 @@ export const routes: Routes = [
     {path: '', component: Home},
     {path: 'login-page', component: LoginPage},
     {path: 'events', component: EventsPage},
-    {path: 'event-details', component: EventDetails},
+    {path: 'event-details/:id', component: EventDetails},
     {path: 'create-event', component: CreateEventsPage}
 ];

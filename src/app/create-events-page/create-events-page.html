@@ -7,33 +7,47 @@
 
 					<form (ngSubmit)="createEvent()" #eventForm="ngForm" novalidate>
 
-						<!-- Small top input (title) -->
-						<div class="mb-3" style="max-width:70%;">
-							<label for="title" class="form-label">Event Title</label>
-							<input id="title" name="title" class="form-control" required
-										 [(ngModel)]="eventTitle" placeholder="Community Cleanup" />
+						<div class="mb-3" style="max-width: 70%">					
+							<input type="text" class="form-control" required
+							[value]="eventTitle()"
+							(input)="eventTitle.set($any($event.target).value)"
+							placeholder="Title, example: Community Cleanup"
+							> 
 						</div>
 
-						<!-- Indented second input -->
-						<div class="mb-3 ms-4" style="max-width:60%;">
-							<label for="subtitle" class="form-label">Short Subtitle</label>
-							<input id="subtitle" name="subtitle" class="form-control" [(ngModel)]="eventLocation" placeholder="Neighborhood Cleanup" />
+						<div class="mb-3 ms-4" style="max-width: 60%">					
+							<input type="text" class="form-control" required
+							[value]="eventLocation()"
+							(input)="eventLocation.set($any($event.target).value)"
+							placeholder="Location"
+							> 
 						</div>
 
-						<!-- Large textarea (main content) -->
-						<div class="mb-3" style="margin-left:0.5rem; margin-right:0.5rem;">
-							<label for="description" class="form-label">Description</label>
-							<textarea id="description" name="description" class="form-control" rows="6" [(ngModel)]="eventDescription" placeholder="Details about the event..."></textarea>
+						<div class="mb-3" style="margin-left:0.5rem; margin-right:0.5rem;">					
+							<input type="text" name="description" type="textarea" class="form-control" style="padding-bottom: 150px"
+							[value]="eventDescription()"
+							(input)="eventDescription.set($any($event.target).value)"
+							placeholder="Descirption">
+						</div>
+						
+						<div class="mb-3 ms-2" style="max-width: 20%">					
+							<input type="text" class="form-control" required
+							[value]="eventTime()"
+							(input)="eventTime.set($any($event.target).value)"
+							placeholder="Time"
+							> 
 						</div>
 
 						<!-- Bottom row: small input on left, button on right -->
 						<div class="d-flex align-items-center">
 							<div style="flex:1; max-width:40%;">
 								<label for="date" class="form-label visually-hidden">Date</label>
-								<input id="date" name="date" type="date" class="form-control" [(ngModel)]="eventDate" />
+								<input id="date" name="date" type="date" class="form-control"
+								(input)="eventDate.set($any($event.target).value)" 
+								[value]="eventDate()" />
 							</div>
 							<div style="flex:0 0 auto; margin-left:auto;">
-								<button type="submit" class="btn btn-primary">Create</button>
+								<button (click)="createEvent()" class="btn btn-primary">Create</button>
 							</div>
 						</div>
 
