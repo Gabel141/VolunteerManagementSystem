@@ -1,13 +1,26 @@
 <div class="event-details-viewport container py-4">
-    <!-- Top search bar rectangle -->
+    <!-- Back link -->
     <div class="row mb-3">
         <div class="col-12">
-            <input class="form-control search-top" placeholder="Search events..." aria-label="Search" />
+            <a routerLink="/events" class="btn btn-sm btn-outline-secondary">← Back to Events</a>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Left: Profile picture section (small square) -->
+    <!-- Loading state -->
+    <div *ngIf="loading" class="text-center py-4">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="!loading && error" class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+
+    <!-- Event detail -->
+    <div *ngIf="!loading && event" class="row">
+        <!-- Left: Profile picture section -->
         <div class="col-12 col-md-3 mb-3">
             <div class="profile-thumb-box text-center">
                 <a routerLink="/profile" class="d-inline-block">
@@ -17,22 +30,31 @@
             </div>
         </div>
 
-        <!-- Right: Events box -->
+        <!-- Right: Event detail card -->
         <div class="col-12 col-md-9">
-            <div class="events-box card">
+            <div class="event-detail-card card">
                 <div class="card-body">
-                    <div *ngIf="(events$ | async) as events">
-                        <div *ngIf="events.length === 0" class="text-muted">No events found.</div>
-                        <div *ngFor="let ev of events" class="event-row mb-3">
-                            <div class="event-row-inner p-3">
-                                <div class="d-flex justify-content-between">
-                                    <h5 class="mb-1">{{ ev.title }}</h5>
-                                    <small class="text-muted">{{ ev.date }} {{ ev.time }}</small>
-                                </div>
-                                <div class="text-muted small">{{ ev.location }}</div>
-                                <p class="mt-2 mb-0">{{ ev.description }}</p>
-                            </div>
+                    <h3 class="card-title mb-2">{{ event.title || 'Untitled Event' }}</h3>
+
+                    <div class="event-meta mb-3">
+                        <div class="meta-item">
+                            <strong>Date:</strong> {{ event.date || 'Date TBD' }}
                         </div>
+                        <div class="meta-item" *ngIf="event.time">
+                            <strong>Time:</strong> {{ event.time }}
+                        </div>
+                        <div class="meta-item">
+                            <strong>Location:</strong> {{ event.location || 'Location TBD' }}
+                        </div>
+                    </div>
+
+                    <div class="event-description">
+                        <strong>Description:</strong>
+                        <p>{{ event.description || 'No description provided.' }}</p>
+                    </div>
+
+                    <div *ngIf="event.image" class="event-image mb-3">
+                        <img [src]="event.image" alt="Event" class="img-fluid">
                     </div>
                 </div>
             </div>
