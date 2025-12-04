@@ -1,26 +1,41 @@
-    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-
-<div class="container">
-    <div class="container-1">
-        <p>img</p>
-        <img src="" alt="">
+<div class="event-details-viewport container py-4">
+    <!-- Top search bar rectangle -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <input class="form-control search-top" placeholder="Search events..." aria-label="Search" />
+        </div>
     </div>
 
-    <div class="container-2">
-        <p>Event</p>
-        <!--
-    <h2 class="mb-3" style="text-align: center; margin-top: 2%;">Title: {{eventTitle()}}</h2>
-        <ul class = "list-group mb-4">
-            <li class = "list-group-item">Date: {{eventDate()}}</li>
-        </ul>
+    <div class="row">
+        <!-- Left: Profile picture section (small square) -->
+        <div class="col-12 col-md-3 mb-3">
+            <div class="profile-thumb-box text-center">
+                <a routerLink="/profile" class="d-inline-block">
+                    <img *ngIf="profilePicture" [src]="profilePicture" class="profile-thumb img-fluid" alt="Profile" />
+                    <div *ngIf="!profilePicture" class="profile-thumb-initials">{{ displayName ? (displayName.charAt(0) | uppercase) : 'U' }}</div>
+                </a>
+            </div>
+        </div>
 
-    <div *ngIf = "events">
-
-        <td><input type="text" [value]="events.title"></td>
-
-    </div>
--->
-
-
+        <!-- Right: Events box -->
+        <div class="col-12 col-md-9">
+            <div class="events-box card">
+                <div class="card-body">
+                    <div *ngIf="(events$ | async) as events">
+                        <div *ngIf="events.length === 0" class="text-muted">No events found.</div>
+                        <div *ngFor="let ev of events" class="event-row mb-3">
+                            <div class="event-row-inner p-3">
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="mb-1">{{ ev.title }}</h5>
+                                    <small class="text-muted">{{ ev.date }} {{ ev.time }}</small>
+                                </div>
+                                <div class="text-muted small">{{ ev.location }}</div>
+                                <p class="mt-2 mb-0">{{ ev.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

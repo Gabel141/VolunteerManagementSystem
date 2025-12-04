@@ -1,43 +1,48 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { Firestore, collection, collectionData, getDocs } from '@angular/fire/firestore';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
-import { map, shareReplay, startWith } from 'rxjs/operators';
-import { getDoc } from '@firebase/firestore';
+import { RouterModule } from '@angular/router';
+import { Firestore, collection, collectionData, doc, getDoc } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth';
+import { Observable } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-event-details',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, RouterModule],
   templateUrl: './event-details.html',
-  styleUrl: './event-details.css',
+  styleUrls: ['./event-details.css'],
 })
 export class EventDetails {
+  events$!: Observable<any[]>;
+  profilePicture = '';
+  displayName = '';
 
-  eventTitle = signal('');
-  eventDate = signal('');
+  constructor(private firestore: Firestore, private auth: Auth) {
+    const eventsCol = collection(this.firestore, 'events');
+    this.events$ = collectionData(eventsCol, { idField: 'id' }).pipe(
+      map((items: any[]) => items.map(i => ({ ...i }))),
+      map(items => items.sort((a, b) => (b.createdAt ? new Date(b.createdAt).getTime() : 0) - (a.createdAt ? new Date(a.createdAt).getTime() : 0))),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
 
-  events: any[] = [];
-
-  constructor(private firestore: Firestore, private router: Router, private route: ActivatedRoute) {
-    const eventsCollection = collection(this.firestore, 'events');
-  collectionData (eventsCollection, { idField: 'id' })
-    .subscribe(data => {
-      this.events = data; // Assign to array so Angular detects changes
-    });
+    this.loadUserProfile();
   }
 
-  ngOnInit() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.events = this.events.find(e => e.id == id);
+  async loadUserProfile(): Promise<void> {
+    try {
+      const user = this.auth.currentUser;
+      if (!user) return;
+      const docRef = doc(this.firestore, 'users', user.uid);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const d: any = snap.data();
+        this.profilePicture = d.profilePicture || '';
+        this.displayName = d.displayName || '';
+      }
+    } catch (e) {
+      // ignore for now
+    }
   }
-  
-  getInfo() {
-    const eventsCollection = collection(this.firestore, 'events');
-    const query = getDocs(eventsCollection);
-    
-  }
-
 }

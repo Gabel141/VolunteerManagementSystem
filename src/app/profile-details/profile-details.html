@@ -52,7 +52,8 @@
             </div>
 
             <div class="button-group mt-4">
-              <button type="button" class="btn btn-edit" (click)="toggleEdit()">Edit Profile</button>
+                <button type="button" class="btn btn-edit" (click)="toggleEdit()">Edit Profile</button>
+                <button type="button" class="btn btn-cancel" (click)="logout()">Logout</button>
             </div>
           </div>
 
@@ -93,6 +94,18 @@
               <label for="profilePicture" class="form-label">Profile Picture URL</label>
               <input type="url" class="form-control" id="profilePicture" name="profilePicture"
                      [(ngModel)]="profilePicture" placeholder="https://example.com/image.jpg" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Or upload a picture</label>
+              <!--input type="file" class="form-control" accept="image/*" (change)="($event) && uploadProfilePicture($event.target.files[0])" /-->
+            </div>
+
+            <div *ngIf="uploadProgress > 0" class="mb-3">
+              <label class="form-label">Upload progress</label>
+              <div class="progress">
+                <div class="progress-bar" role="progressbar" [style.width.%]="uploadProgress" aria-valuenow="{{uploadProgress}}" aria-valuemin="0" aria-valuemax="100">{{ uploadProgress }}%</div>
+              </div>
             </div>
 
             <div class="button-group mt-4">
