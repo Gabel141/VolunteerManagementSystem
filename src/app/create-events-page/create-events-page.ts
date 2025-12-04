@@ -37,7 +37,7 @@ export class CreateEventsPage {
     const user = this.auth.currentUser
 
     if (!user) {
-      alert("NO USER!");
+      this.router.navigateByUrl('/login-page');
       return;
     }
 

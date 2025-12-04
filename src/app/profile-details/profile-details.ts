@@ -41,6 +41,7 @@ export class ProfileDetails implements OnInit {
       const user = this.auth.currentUser;
       if (!user) {
         this.error = 'No user logged in.';
+        this.router.navigateByUrl('/login-page');
         return;
       }
 
