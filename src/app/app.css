@@ -1,0 +1,35 @@
+a.nav-link {
+    color: white;
+    border-radius: 8px;
+}
+
+a.nav-link:hover {
+    color: black;
+    background-color: white;
+}
+/* Navbar profile circle styling */
+.navbar-profile-link {
+    text-decoration: none;
+    cursor: pointer;
+    margin-right: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.profile-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border: 2px solid rgba(255,255,255,0.4);
+    transition: all 0.3s ease;
+}
+
+.navbar-profile-link:hover .profile-circle {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.6);
+}

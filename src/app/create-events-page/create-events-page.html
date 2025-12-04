@@ -1,0 +1,59 @@
+<div class="container py-4">
+	<div class="row justify-content-start">
+		<div class="col-12 col-lg-10">
+			<div class="card">
+				<div class="card-body">
+					<h4 class="card-title mb-3">Create Event</h4>
+
+					<form (ngSubmit)="createEvent()" #eventForm="ngForm" novalidate>
+
+						<div class="mb-3" style="max-width: 70%">					
+							<input type="text" class="form-control" required
+							[value]="eventTitle()"
+							(input)="eventTitle.set($any($event.target).value)"
+							placeholder="Title, example: Community Cleanup"
+							> 
+						</div>
+
+						<div class="mb-3 ms-4" style="max-width: 60%">					
+							<input type="text" class="form-control" required
+							[value]="eventLocation()"
+							(input)="eventLocation.set($any($event.target).value)"
+							placeholder="Location"
+							> 
+						</div>
+
+						<div class="mb-3" style="margin-left:0.5rem; margin-right:0.5rem;">					
+							<input type="text" name="description" type="textarea" class="form-control" style="padding-bottom: 150px"
+							[value]="eventDescription()"
+							(input)="eventDescription.set($any($event.target).value)"
+							placeholder="Descirption">
+						</div>
+						
+						<div class="mb-3 ms-2" style="max-width: 20%">					
+							<input type="text" class="form-control" required
+							[value]="eventTime()"
+							(input)="eventTime.set($any($event.target).value)"
+							placeholder="Time"
+							> 
+						</div>
+
+						<!-- Bottom row: small input on left, button on right -->
+						<div class="d-flex align-items-center">
+							<div style="flex:1; max-width:40%;">
+								<label for="date" class="form-label visually-hidden">Date</label>
+								<input id="date" name="date" type="date" class="form-control"
+								(input)="eventDate.set($any($event.target).value)" 
+								[value]="eventDate()" />
+							</div>
+							<div style="flex:0 0 auto; margin-left:auto;">
+								<button (click)="createEvent()" class="btn btn-primary">Create</button>
+							</div>
+						</div>
+
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

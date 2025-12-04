@@ -1,0 +1,66 @@
+<div class="event-details-viewport container py-4">
+    <!-- Back link -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <a routerLink="/" class="btn btn-sm btn-outline-secondary">← Back to Events</a>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="loading" class="text-center py-4">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="!loading && error" class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+
+    <!-- Event detail -->
+    <div *ngIf="!loading && event" class="row">
+        <!-- Left: Profile picture section -->
+        <div class="col-12 col-md-3 mb-3">
+            <div class="profile-thumb-box text-center">
+                <a routerLink="/profile" class="d-inline-block">
+                    <img *ngIf="profilePicture" [src]="profilePicture" class="profile-thumb img-fluid" alt="Profile" />
+                    <div *ngIf="!profilePicture" class="profile-thumb-initials">{{ displayName ? (displayName.charAt(0) | uppercase) : 'U' }}</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Right: Event detail card -->
+        <div class="col-12 col-md-9">
+            <div class="event-detail-card card">
+                <div class="card-body">
+                    <h3 class="card-title mb-2">{{ event.title || 'Untitled Event' }}</h3>
+
+                    <div class="event-meta mb-3">
+                        <div class="meta-item">
+                            <strong>Date:</strong> {{ event.date || 'Date TBD' }}
+                        </div>
+                        <div class="meta-item" *ngIf="event.time">
+                            <strong>Time:</strong> {{ event.time }}
+                        </div>
+                        <div class="meta-item">
+                            <strong>Location:</strong> {{ event.location || 'Location TBD' }}
+                        </div>
+                        <div class="meta-item">
+                            <strong>Creator:</strong> {{ event.creator || 'No Creator' }}
+                        </div>
+                    </div>
+
+                    <div class="event-description">
+                        <strong>Description:</strong>
+                        <p>{{ event.description || 'No description provided.' }}</p>
+                    </div>
+
+                    <div *ngIf="event.image" class="event-image mb-3">
+                        <img [src]="event.image" alt="Event" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
