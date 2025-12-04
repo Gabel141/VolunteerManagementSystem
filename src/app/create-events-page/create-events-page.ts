@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Firestore, collection, addDoc, collectionData } from '@angular/fire/firestore';
@@ -12,11 +12,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./create-events-page.css'],
 })
 export class CreateEventsPage {
-  eventTitle = '';
-  eventDate = '';
-  eventTime = '';
-  eventLocation = '';
-  eventDescription = '';
+  eventTitle = signal('');
+  eventDate = signal('');
+  eventTime = signal('');
+  eventLocation = signal('');
+  eventDescription = signal('');
 
   events: any[] = [];
 
@@ -29,19 +29,19 @@ export class CreateEventsPage {
   }
 
   createEvent() {
-    const title = this.eventTitle;
-    const date = this.eventDate;
-    const time = this.eventTime;
-    const location = this.eventLocation;
-    const description = this.eventDescription;
+    const title = this.eventTitle();
+    const date = this.eventDate();
+    const time = this.eventTime();
+    const location = this.eventLocation();
+    const description = this.eventDescription();
     if (title && date && time && location && description) {
       const eventsCollection = collection(this.firestore, 'events');
       addDoc(eventsCollection, { title, date, time, location, description });
-      this.eventTitle = '';
-      this.eventDate = '';
-      this.eventTime = '';
-      this.eventLocation = '';
-      this.eventDescription = '';
+      this.eventTitle.set('');
+      this.eventDate.set('');
+      this.eventTime.set('');
+      this.eventLocation.set('');
+      this.eventDescription.set('');
       this.router.navigate(['/events']);
     }
 
