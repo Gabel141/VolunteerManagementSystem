@@ -1,16 +1,17 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
-  selector: 'app-login-page',
+  selector: 'app-register',
   imports: [ReactiveFormsModule],
-  templateUrl: './login-page.html',
-  styleUrl: './login-page.css',
+  templateUrl: './register.html',
+  styleUrl: './register.css',
 })
-export class LoginPage {
-  
+export class Register {
+
   fb = inject(FormBuilder);
   router = inject(Router);
   authService = inject(AuthService);
@@ -18,17 +19,16 @@ export class LoginPage {
   errorMessage: string | null = null;
 
   form = this.fb.nonNullable.group({
+    username: ['', Validators.required],
     email: ['', Validators.required],
     password: ['', Validators.required],
   });
-
-
 
   onSubmit(): void {
     console.log('register');
     const rawForm = this.form.getRawValue()
     this.authService
-      .login(rawForm.email, rawForm.password)
+      .register(rawForm.email, rawForm.username, rawForm.password)
       .subscribe({
         next: () => {
         this.router.navigateByUrl('/');

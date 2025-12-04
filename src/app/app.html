@@ -12,19 +12,36 @@
           <div class="navbar-nav">
               <a class="nav-link" routerLink="/">Home</a> <!-- remember to not have /'s in your routes gabel' -->
           </div>
-          <div class="navbar-nav">
-            <a class="nav-link" routerLink="/login-page">Login</a> <!-- remember to not have /'s in your routes gabel' -->
+            <div class="navbar-nav">
+              <a class="nav-link" routerLink="/events">Events</a> <!-- remember to not have /'s in your routes gabel' -->
+          </div>
+            <div class="navbar-nav">
+              <a class="nav-link" routerLink="/event-details">Event Details</a> <!-- remember to not have /'s in your routes gabel' -->
+          </div>
+            <div class="navbar-nav">
+              <a class="nav-link" routerLink="/create-event">Create Events</a> <!-- remember to not have /'s in your routes gabel' -->
+          </div>
+
+          @if (authService.currentUserSig() == null) {
+            <div class="navbar-nav">
+              <a class="nav-link" routerLink="/login-page">Login</a> <!-- remember to not have /'s in your routes gabel' -->
+            </div>
+            <div>
+                <a class="nav-link" routerLink="/register">Register</a>
+            </div>
+          }
+
+          @if (authService.currentUserSig()) {
+            <div>
+                <span (click)="logout()" style="color: white;">Logout</span>
+            </div>
+          }
+
+
+
+
+
         </div>
-          <div class="navbar-nav">
-            <a class="nav-link" routerLink="/events">Events</a> <!-- remember to not have /'s in your routes gabel' -->
-        </div>
-          <div class="navbar-nav">
-            <a class="nav-link" routerLink="/event-details">Event Details</a> <!-- remember to not have /'s in your routes gabel' -->
-        </div>
-          <div class="navbar-nav">
-            <a class="nav-link" routerLink="/create-event">Create Events</a> <!-- remember to not have /'s in your routes gabel' -->
-        </div>
-      </div>
 
   </div>
 
