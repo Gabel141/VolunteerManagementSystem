@@ -1,1 +1,111 @@
-<p>profile-details works!</p>
+<div class="profile-viewport container-fluid py-4">
+  <div class="row">
+    <!-- Left: Profile Picture Circle -->
+    <div class="col-12 col-md-3 mb-4 mb-md-0">
+      <div class="profile-picture-box">
+        <div class="profile-circle-large" *ngIf="!profilePicture">
+          {{ getInitials() }}
+        </div>
+        <img *ngIf="profilePicture" [src]="profilePicture" alt="Profile Picture" class="profile-image">
+      </div>
+    </div>
+
+    <!-- Right: Profile Information -->
+    <div class="col-12 col-md-9">
+      <div class="card profile-card">
+        <div class="card-body">
+          <!-- Alerts -->
+          <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ error }}
+            <button type="button" class="btn-close" (click)="error = ''"></button>
+          </div>
+          <div *ngIf="success" class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ success }}
+            <button type="button" class="btn-close" (click)="success = ''"></button>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="loading" class="text-center py-4">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <!-- View Mode -->
+          <div *ngIf="!loading && !isEditing">
+            <h4 class="profile-name">{{ displayName || 'No Name' }}</h4>
+            <div class="profile-info-item">
+              <span class="profile-label">Email:</span>
+              <span class="profile-value">{{ email }}</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-label">Phone:</span>
+              <span class="profile-value">{{ phone || 'Not provided' }}</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-label">Location:</span>
+              <span class="profile-value">{{ location || 'Not provided' }}</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-label">Bio:</span>
+              <p class="profile-value profile-bio">{{ bio || 'No bio provided' }}</p>
+            </div>
+
+            <div class="button-group mt-4">
+              <button type="button" class="btn btn-edit" (click)="toggleEdit()">Edit Profile</button>
+            </div>
+          </div>
+
+          <!-- Edit Mode -->
+          <form *ngIf="!loading && isEditing" (ngSubmit)="saveProfile()" #profileForm="ngForm" novalidate>
+            <div class="mb-3">
+              <label for="displayName" class="form-label">Display Name</label>
+              <input type="text" class="form-control" id="displayName" name="displayName" required
+                     [(ngModel)]="displayName" placeholder="Your full name" />
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email" required disabled
+                     [(ngModel)]="email" placeholder="your@email.com" />
+              <small class="text-muted">Email cannot be changed.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="phone" class="form-label">Phone</label>
+              <input type="tel" class="form-control" id="phone" name="phone"
+                     [(ngModel)]="phone" placeholder="(555) 123-4567" />
+            </div>
+
+            <div class="mb-3">
+              <label for="location" class="form-label">Location</label>
+              <input type="text" class="form-control" id="location" name="location"
+                     [(ngModel)]="location" placeholder="City, State" />
+            </div>
+
+            <div class="mb-3">
+              <label for="bio" class="form-label">Bio</label>
+              <textarea class="form-control" id="bio" name="bio" rows="4"
+                        [(ngModel)]="bio" placeholder="Tell us about yourself..."></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="profilePicture" class="form-label">Profile Picture URL</label>
+              <input type="url" class="form-control" id="profilePicture" name="profilePicture"
+                     [(ngModel)]="profilePicture" placeholder="https://example.com/image.jpg" />
+            </div>
+
+            <div class="button-group mt-4">
+              <button type="submit" class="btn btn-save" [disabled]="profileForm.invalid || loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Save Changes
+              </button>
+              <button type="button" class="btn btn-cancel" (click)="toggleEdit()">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
