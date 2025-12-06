@@ -1,44 +1,43 @@
-import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Firestore, collection, collectionData, addDoc, doc, deleteDoc, updateDoc } from
-'@angular/fire/firestore';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login-page',
-  imports: [CommonModule, FormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './login-page.html',
   styleUrl: './login-page.css',
 })
 export class LoginPage {
+  
+  fb = inject(FormBuilder);
+  router = inject(Router);
+  authService = inject(AuthService);
 
-  title = signal('Volunteer Management System');
+  errorMessage: string | null = null;
 
-volunteerName = signal('');
-volunteerEmail = signal('');
-volunteerPassword = signal('');
+  form = this.fb.nonNullable.group({
+    email: ['', Validators.required],
+    password: ['', Validators.required],
+  });
 
-volunteers: any[] = [];
 
-constructor(private firestore: Firestore) {
-const volunteersCollection = collection(this.firestore, 'volunteers');
-collectionData(volunteersCollection, { idField: 'id' })
-.subscribe(data => {
-this.volunteers = data; // Assign to array so Angular detects changes
-});
-}
 
-registerVolunteer() {
-  const name = this.volunteerName();
-  const email = this.volunteerEmail();
-  const password = this.volunteerPassword();
-  if (name && email && password) {
-    const volunteersCollection = collection(this.firestore, 'volunteers');
-    addDoc(volunteersCollection, {name, email, password});
-    this.volunteerName();
-    this.volunteerEmail();
-    this.volunteerPassword();
+  onSubmit(): void {
+    console.log('register');
+    const rawForm = this.form.getRawValue()
+    this.authService
+      .login(rawForm.email, rawForm.password)
+      .subscribe({
+        next: () => {
+        this.router.navigateByUrl('/');
+        },
+        error: (err) => {
+          this.errorMessage = err.code;
+        }
+
+    })
   }
-}
 
 }

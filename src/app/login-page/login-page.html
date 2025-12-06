@@ -7,57 +7,24 @@
 				<h3 class="login-title">Welcome back</h3>
 				<div class="login-subtext">Sign in to your volunteer account</div>
 
-				<form (ngSubmit)="registerVolunteer()" #volForm="ngForm" novalidate>
-					<div class="mb-3">
-						<label for="name" class="form-label">Full name</label>
-						<input
-							id="name"
-							name="name"
-							class="form-control"
-							required
-							[ngModel]="volunteerName()"
-							(ngModelChange)="volunteerName.set($event)"
-							placeholder="Your full name"
-						/>
-					</div>
+					@if (errorMessage) {
+						<div>{{errorMessage}}</div>
+					}
 
-					<div class="mb-3">
-						<label for="email" class="form-label">Email</label>
-						<input
-							type="email"
-							id="email"
-							name="email"
-							class="form-control"
-							required
-							[ngModel]="volunteerEmail()"
-							(ngModelChange)="volunteerEmail.set($event)"
-							placeholder="you@example.org"
-						/>
-					</div>
+					<form [formGroup]="form" (ngSubmit)="onSubmit()">
+						<div class="mb-4">
+							<input class="form-control" type="text" placeholder="Email" formControlName="email" />
+						</div>
+						<div class="mb-4">
+							<input class="form-control" type="password" placeholder="Password" formControlName="password" />
+						</div>
+						<div class="mb4">
+							<button class="form-control" type="submit">Sign In</button>
+						</div>
+					</form>
 
-					<div class="mb-3">
-						<label for="password" class="form-label">Password</label>
-						<input
-							type="password"
-							id="password"
-							name="password"
-							class="form-control"
-							required
-							[ngModel]="volunteerPassword()"
-							(ngModelChange)="volunteerPassword.set($event)"
-							placeholder="Enter your password"
-						/>
-					</div>
-
-					<div class="action-row">
-						<button type="submit" class="btn btn-primary btn-primary-custom" [disabled]="volForm.invalid">
-							Register
-						</button>
-						<button type="button" class="btn btn-outline-secondary btn-outline-custom" (click)="$event.preventDefault()">Login</button>
-					</div>
 
 					<a class="forgot-link" href="#">Forgot password?</a>
-				</form>
 			</div>
 		</div>
 	</div>

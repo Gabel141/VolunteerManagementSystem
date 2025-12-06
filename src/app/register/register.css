@@ -1,0 +1,100 @@
+:root {
+	--olive-leaf: #606c38ff;
+	--black-forest: #283618ff;
+	--cornsilk: #fefae0ff;
+	--sunlit-clay: #dda15eff;
+	--copperwood: #bc6c25ff;
+}
+
+/* Page layout */
+html, body, :host {
+	height: 100%;
+}
+
+body {
+	background: var(--cornsilk);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+	color: var(--black-forest);
+}
+
+.login-viewport {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+}
+
+/* small rectangle above the card (wireframe) */
+.brand-pill {
+	width: 220px;
+	height: 34px;
+	background: var(--olive-leaf);
+	border-radius: 4px;
+	display: block;
+	margin: 0 auto 16px auto;
+	box-shadow: 0 2px 0 rgba(0,0,0,0.06) inset;
+}
+
+.login-card {
+	width: 340px;
+	background: white;
+	border-radius: 6px;
+	box-shadow: 0 8px 24px rgba(40,54,24,0.08);
+	border: 1px solid rgba(40,54,24,0.06);
+	overflow: hidden;
+}
+
+.login-card .card-body {
+	padding: 1.5rem;
+}
+
+.login-title {
+	text-align: center;
+	font-weight: 600;
+	color: var(--black-forest);
+	margin-bottom: 0.75rem;
+}
+
+.login-subtext {
+	text-align: center;
+	color: var(--olive-leaf);
+	font-size: 0.9rem;
+	margin-bottom: 1rem;
+}
+
+.form-control:focus {
+	border-color: var(--olive-leaf);
+	box-shadow: 0 0 0 0.15rem rgba(96,108,56,0.12);
+}
+
+.btn-primary-custom {
+	background: linear-gradient(180deg,var(--sunlit-clay), var(--copperwood));
+	border: none;
+	color: var(--cornsilk);
+}
+
+.btn-outline-custom {
+	border-color: var(--olive-leaf);
+	color: var(--olive-leaf);
+	background: transparent;
+}
+
+.action-row {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: center;
+	margin-top: 1rem;
+}
+
+.forgot-link {
+	display: block;
+	text-align: center;
+	margin-top: 0.5rem;
+	color: var(--olive-leaf);
+}
+
+@media (max-width: 400px) {
+	.login-card { width: 92%; }
+	.brand-pill { width: 160px; }
+}

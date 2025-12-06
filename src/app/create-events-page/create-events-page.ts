@@ -1,8 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, addDoc, collectionData } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, collectionData, doc } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth'
 import { Router } from '@angular/router';
+import { getDoc } from '@firebase/firestore';
 
 @Component({
   selector: 'app-create-events-page',
@@ -12,6 +14,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./create-events-page.css'],
 })
 export class CreateEventsPage {
+
   eventTitle = signal('');
   eventDate = signal('');
   eventTime = signal('');
@@ -19,8 +22,9 @@ export class CreateEventsPage {
   eventDescription = signal('');
 
   events: any[] = [];
+  user: any;
 
-  constructor(private firestore: Firestore, private router: Router) {
+  constructor(private firestore: Firestore, private auth: Auth, private router: Router) {
     const eventsCollection = collection(this.firestore, 'events');
   collectionData (eventsCollection, { idField: 'id' })
     .subscribe(data => {
@@ -29,14 +33,23 @@ export class CreateEventsPage {
   }
 
   createEvent() {
+
+    const user = this.auth.currentUser
+
+    if (!user) {
+      this.router.navigateByUrl('/login-page');
+      return;
+    }
+
     const title = this.eventTitle();
     const date = this.eventDate();
     const time = this.eventTime();
     const location = this.eventLocation();
     const description = this.eventDescription();
-    if (title && date && time && location && description) {
+    const creator = user.displayName
+    if (title && date && time && location && description && creator) {
       const eventsCollection = collection(this.firestore, 'events');
-      addDoc(eventsCollection, { title, date, time, location, description });
+      addDoc(eventsCollection, { title, date, time, location, description, creator });
       this.eventTitle.set('');
       this.eventDate.set('');
       this.eventTime.set('');

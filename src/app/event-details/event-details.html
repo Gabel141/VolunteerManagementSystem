@@ -2,7 +2,7 @@
     <!-- Back link -->
     <div class="row mb-3">
         <div class="col-12">
-            <a routerLink="/events" class="btn btn-sm btn-outline-secondary">← Back to Events</a>
+            <a routerLink="/" class="btn btn-sm btn-outline-secondary">← Back to Events</a>
         </div>
     </div>
 
@@ -45,6 +45,9 @@
                         </div>
                         <div class="meta-item">
                             <strong>Location:</strong> {{ event.location || 'Location TBD' }}
+                        </div>
+                        <div class="meta-item">
+                            <strong>Creator:</strong> {{ event.creator || 'No Creator' }}
                         </div>
                     </div>
 

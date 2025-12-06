@@ -106,8 +106,6 @@
 @media (max-width: 768px) {
   .event-detail-card .card-title {
     font-size: 1.5rem;
-  }
-}
     left: 30px;
     width: 440px;
     height: 120px;

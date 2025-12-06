@@ -8,21 +8,43 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarID" style="margin-left: 5%">
-          <div class="navbar-nav">
-            <a class="nav-link" routerLink="/">Login</a> <!-- remember to not have /'s in your routes gabel' -->
-        </div>
-          <div class="navbar-nav">
-            <a class="nav-link" routerLink="/events">Events</a> <!-- remember to not have /'s in your routes gabel' -->
-        </div>
-          <div class="navbar-nav">
-            <a class="nav-link" routerLink="/create-event">Create Events</a> <!-- remember to not have /'s in your routes gabel' -->
-        </div>
-      </div>
 
-      <!-- Profile picture circle on the right -->
-      <a routerLink="/profile" class="navbar-profile-link ms-auto me-2" title="View Profile">
-        <div class="profile-circle">👤</div>
-      </a>
+            <div class="navbar-nav">
+              
+              <a class="nav-link" routerLink="/">
+               Events
+              </a> <!-- remember to not have /'s in your routes gabel' -->
+          </div>
+            <div class="navbar-nav">
+              <a class="nav-link" routerLink="/create-event">Create Events</a> <!-- remember to not have /'s in your routes gabel' -->
+          </div>
+
+          <div class="navbar-profile-link ms-auto me-2">
+            @if (authService.currentUserSig() == null) {
+              <div class="navbar-nav">
+                <a class="nav-link" routerLink="/login-page">Login</a> <!-- remember to not have /'s in your routes gabel' -->
+              </div>
+              <div>
+                  <a class="nav-link" routerLink="/register">Register</a>
+              </div>
+            }
+
+            @if (authService.currentUserSig()) {
+              <div>
+                  <span (click)="logout()" style="color: white;">Logout</span>
+              </div>
+            }
+
+          <a routerLink="/profile" title="View Profile" style="margin-left: 20px">
+            <div class="profile-circle">👤</div>
+          </a>
+          
+          </div>
+
+
+
+
+        </div>
 
   </div>
 
