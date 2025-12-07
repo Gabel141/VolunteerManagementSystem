@@ -1,0 +1,110 @@
+<div class="modal fade" id="signupModal" [class.show]="isModalOpen()" [style.display]="isModalOpen() ? 'block' : 'none'" tabindex="-1" aria-labelledby="signupModalLabel" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="signupModalLabel">Create Account</h5>
+        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        @if (errorMessage) {
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ errorMessage }}
+            <button type="button" class="btn-close" (click)="errorMessage = null"></button>
+          </div>
+        }
+
+        @if (successMessage) {
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ successMessage }}
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              placeholder="Choose a username"
+              formControlName="username"
+              [class.is-invalid]="form.get('username')?.invalid && form.get('username')?.touched"
+            />
+            @if (form.get('username')?.invalid && form.get('username')?.touched) {
+              <div class="invalid-feedback">
+                Username must be at least 3 characters.
+              </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              placeholder="Enter your email"
+              formControlName="email"
+              [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+            />
+            @if (form.get('email')?.invalid && form.get('email')?.touched) {
+              <div class="invalid-feedback">
+                Please enter a valid email.
+              </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              placeholder="Create a password (min 6 characters)"
+              formControlName="password"
+              [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+            />
+            @if (form.get('password')?.invalid && form.get('password')?.touched) {
+              <div class="invalid-feedback">
+                Password must be at least 6 characters.
+              </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="confirmPassword"
+              placeholder="Confirm your password"
+              formControlName="confirmPassword"
+              [class.is-invalid]="form.get('confirmPassword')?.invalid && form.get('confirmPassword')?.touched"
+            />
+            @if (form.get('confirmPassword')?.invalid && form.get('confirmPassword')?.touched) {
+              <div class="invalid-feedback">
+                Please confirm your password.
+              </div>
+            }
+          </div>
+
+          <button type="submit" class="btn btn-signup w-100 mb-3" [disabled]="!form.valid || isLoading">
+            @if (isLoading) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            }
+            {{ isLoading ? 'Creating account...' : 'Sign Up' }}
+          </button>
+        </form>
+
+        <div class="text-center">
+          <small>Already have an account? <button type="button" class="btn btn-link p-0" (click)="openLoginModal()">Sign in</button></small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop -->
+@if (isModalOpen()) {
+  <div class="modal-backdrop fade show" (click)="closeModal()"></div>
+}

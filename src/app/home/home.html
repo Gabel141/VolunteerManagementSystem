@@ -1,1 +1,66 @@
-<p>home works!</p>
+<div class="home-viewport">
+  <div class="container-lg py-5">
+    <div class="row align-items-center min-vh-100">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <h1 class="hero-title">Volunteer Management</h1>
+          <p class="hero-subtitle">Connect, organize, and make a difference in your community</p>
+          <p class="hero-description">
+            Join a network of dedicated volunteers. Create events, join others' initiatives, and track your impact with our comprehensive volunteer management platform.
+          </p>
+
+          <div class="cta-buttons">
+            @if (isAuthenticated()) {
+              <button (click)="navigateToEvents()" class="btn btn-primary btn-lg me-3">
+                View Events
+              </button>
+              <button (click)="navigateToCreateEvent()" class="btn btn-secondary btn-lg">
+                Create Event
+              </button>
+            }
+            @if (!isAuthenticated()) {
+              <button (click)="openSignupModal()" class="btn btn-primary btn-lg me-3">
+                Get Started
+              </button>
+              <button (click)="openLoginModal()" class="btn btn-outline-primary btn-lg">
+                Sign In
+              </button>
+            }
+          </div>
+
+          <div class="hero-features mt-5">
+            <div class="feature-item">
+              <span class="feature-icon">📋</span>
+              <h4>Manage Events</h4>
+              <p>Create and organize volunteer events easily</p>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">👥</span>
+              <h4>Connect Volunteers</h4>
+              <p>Find like-minded volunteers and build community</p>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">📊</span>
+              <h4>Track Impact</h4>
+              <p>Monitor your volunteer hours and contributions</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="hero-image">
+          <div class="image-placeholder">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" class="placeholder-svg">
+              <rect width="400" height="400" fill="rgba(96, 108, 56, 0.1)"/>
+              <circle cx="200" cy="150" r="60" fill="rgba(221, 161, 94, 0.3)"/>
+              <path d="M 140 240 Q 200 220 260 240" fill="none" stroke="rgba(96, 108, 56, 0.2)" stroke-width="3"/>
+              <text x="200" y="350" text-anchor="middle" fill="rgba(40, 54, 24, 0.3)" font-size="24">Volunteers Making Impact</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

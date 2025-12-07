@@ -1,53 +1,50 @@
-<nav class="navbar navbar-expand-sm" style="background-color: #7EA22B;">
-
+<nav class="navbar navbar-expand-lg navbar-custom">
   <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">VolunteerHub</a>
 
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarID"
-          aria-controls="navbarID" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-      </button>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-      <div class="collapse navbar-collapse" id="navbarID" style="margin-left: 5%">
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/events" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">Events</a>
+        </li>
 
-            <div class="navbar-nav">
-              
-              <a class="nav-link" routerLink="/">
-               Events
-              </a> <!-- remember to not have /'s in your routes gabel' -->
-          </div>
-            <div class="navbar-nav">
-              <a class="nav-link" routerLink="/create-event">Create Events</a> <!-- remember to not have /'s in your routes gabel' -->
-          </div>
+        @if (authService.currentUserSig()) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/create-event" routerLinkActive="active">Create Event</a>
+          </li>
+        }
 
-          <div class="navbar-profile-link ms-auto me-2">
-            @if (authService.currentUserSig() == null) {
-              <div class="navbar-nav">
-                <a class="nav-link" routerLink="/login-page">Login</a> <!-- remember to not have /'s in your routes gabel' -->
-              </div>
-              <div>
-                  <a class="nav-link" routerLink="/register">Register</a>
-              </div>
-            }
+        @if (authService.currentUserSig() == null) {
+          <li class="nav-item">
+            <button class="btn btn-nav-login" (click)="openLoginModal()">Login</button>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-nav-signup" (click)="openSignupModal()">Sign Up</button>
+          </li>
+        }
 
-            @if (authService.currentUserSig()) {
-              <div>
-                  <span (click)="logout()" style="color: white;">Logout</span>
-              </div>
-            }
-
-          <a routerLink="/profile" title="View Profile" style="margin-left: 20px">
-            <div class="profile-circle">👤</div>
-          </a>
-          
-          </div>
-
-
-
-
-        </div>
-
+        @if (authService.currentUserSig()) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/profile" routerLinkActive="active" title="View Profile">
+              <span class="profile-circle">👤</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-nav-logout" (click)="logout()">Logout</button>
+          </li>
+        }
+      </ul>
+    </div>
   </div>
-
 </nav>
 
 <router-outlet></router-outlet>
+
+<!-- Modals -->
+<app-login-modal></app-login-modal>
+<app-signup-modal></app-signup-modal>

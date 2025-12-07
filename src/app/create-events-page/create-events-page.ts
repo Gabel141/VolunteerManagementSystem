@@ -1,9 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Firestore, collection, addDoc, collectionData, doc } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth'
 import { Router } from '@angular/router';
+import { ModalService } from '../services/modal.service';
 import { getDoc } from '@firebase/firestore';
 
 @Component({
@@ -13,7 +14,11 @@ import { getDoc } from '@firebase/firestore';
   templateUrl: './create-events-page.html',
   styleUrls: ['./create-events-page.css'],
 })
-export class CreateEventsPage {
+export class CreateEventsPage implements OnInit {
+  firestore = inject(Firestore);
+  auth = inject(Auth);
+  router = inject(Router);
+  modalService = inject(ModalService);
 
   eventTitle = signal('');
   eventDate = signal('');
@@ -22,14 +27,13 @@ export class CreateEventsPage {
   eventDescription = signal('');
 
   events: any[] = [];
-  user: any;
 
-  constructor(private firestore: Firestore, private auth: Auth, private router: Router) {
+  ngOnInit() {
     const eventsCollection = collection(this.firestore, 'events');
-  collectionData (eventsCollection, { idField: 'id' })
-    .subscribe(data => {
-      this.events = data; // Assign to array so Angular detects changes
-    });
+    collectionData(eventsCollection, { idField: 'id' })
+      .subscribe(data => {
+        this.events = data;
+      });
   }
 
   createEvent() {
@@ -37,7 +41,7 @@ export class CreateEventsPage {
     const user = this.auth.currentUser
 
     if (!user) {
-      this.router.navigateByUrl('/login-page');
+      this.modalService.openModal('login');
       return;
     }
 

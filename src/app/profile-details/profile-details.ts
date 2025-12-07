@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { Auth } from '@angular/fire/auth';
 import { Firestore, collection, doc, getDoc, setDoc, updateDoc } from '@angular/fire/firestore';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
+import { ModalService } from '../services/modal.service';
 
 @Component({
   selector: 'app-profile-details',
@@ -15,6 +16,12 @@ import { signOut } from 'firebase/auth';
   styleUrls: ['./profile-details.css'],
 })
 export class ProfileDetails implements OnInit {
+  // Inject dependencies
+  auth = inject(Auth);
+  firestore = inject(Firestore);
+  router = inject(Router);
+  modalService = inject(ModalService);
+
   // Profile fields
   displayName = '';
   email = '';
@@ -29,8 +36,6 @@ export class ProfileDetails implements OnInit {
   success = '';
   isEditing = false;
 
-  constructor(private auth: Auth, private firestore: Firestore, private router: Router) {}
-
   ngOnInit() {
     this.loadProfile();
   }
@@ -41,7 +46,7 @@ export class ProfileDetails implements OnInit {
       const user = this.auth.currentUser;
       if (!user) {
         this.error = 'No user logged in.';
-        this.router.navigateByUrl('/login-page');
+        this.modalService.openModal('login');
         return;
       }
 

@@ -1,0 +1,131 @@
+:root {
+  --olive-leaf: #606c38ff;
+  --black-forest: #283618ff;
+  --cornsilk: #fefae0ff;
+  --sunlit-clay: #dda15eff;
+  --copperwood: #bc6c25ff;
+}
+
+.modal-content {
+  border: 2px solid var(--black-forest);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(40, 54, 24, 0.15);
+}
+
+.modal-header {
+  background-color: rgba(96, 108, 56, 0.05);
+  border-bottom: 1px solid rgba(40, 54, 24, 0.1);
+}
+
+.modal-title {
+  color: var(--black-forest);
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.form-label {
+  color: var(--black-forest);
+  font-weight: 500;
+}
+
+.form-control {
+  border: 1px solid rgba(40, 54, 24, 0.2);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--sunlit-clay);
+  box-shadow: 0 0 0 0.2rem rgba(221, 161, 94, 0.15);
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.form-control.is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 0.875rem;
+}
+
+.btn-signup {
+  background-color: var(--black-forest);
+  border-color: var(--black-forest);
+  color: var(--cornsilk);
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-signup:hover:not(:disabled) {
+  background-color: var(--olive-leaf);
+  border-color: var(--olive-leaf);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 54, 24, 0.2);
+}
+
+.btn-signup:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-link {
+  color: var(--sunlit-clay);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.btn-link:hover {
+  color: var(--copperwood);
+}
+
+.modal-backdrop {
+  background-color: rgba(40, 54, 24, 0.5);
+}
+
+.modal.fade .modal-dialog {
+  transform: scale(0.95);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.modal.fade.show .modal-dialog {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Alert Styling */
+.alert {
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+.alert-success {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.btn-close {
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.btn-close:hover {
+  opacity: 0.7;
+}

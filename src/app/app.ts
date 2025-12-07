@@ -1,18 +1,21 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { AuthService } from './services/auth.service';
+import { ModalService } from './services/modal.service';
 import { CommonModule } from '@angular/common';
+import { LoginModal } from './modals/login-modal/login-modal';
+import { SignupModal } from './modals/signup-modal/signup-modal';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, CommonModule],
+  standalone: true,
+  imports: [RouterModule, CommonModule, LoginModal, SignupModal],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('volunteer-management-system');
-
   authService = inject(AuthService);
+  modalService = inject(ModalService);
 
   ngOnInit(): void {
     this.authService.user$.subscribe(user => {
@@ -25,11 +28,18 @@ export class App {
       else {
         this.authService.currentUserSig.set(null);
       }
-      console.log(this.authService.currentUserSig());
     });
   }
 
   logout(): void {
     this.authService.logout();
+  }
+
+  openLoginModal(): void {
+    this.modalService.openModal('login');
+  }
+
+  openSignupModal(): void {
+    this.modalService.openModal('signup');
   }
 }

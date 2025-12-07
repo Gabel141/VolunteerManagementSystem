@@ -1,0 +1,70 @@
+<div class="modal fade" id="loginModal" [class.show]="isModalOpen()" [style.display]="isModalOpen() ? 'block' : 'none'" tabindex="-1" aria-labelledby="loginModalLabel" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="loginModalLabel">Sign In</h5>
+        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        @if (errorMessage) {
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ errorMessage }}
+            <button type="button" class="btn-close" (click)="errorMessage = null"></button>
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              placeholder="Enter your email"
+              formControlName="email"
+              [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+            />
+            @if (form.get('email')?.invalid && form.get('email')?.touched) {
+              <div class="invalid-feedback">
+                Please enter a valid email.
+              </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              placeholder="Enter your password"
+              formControlName="password"
+              [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+            />
+            @if (form.get('password')?.invalid && form.get('password')?.touched) {
+              <div class="invalid-feedback">
+                Password is required.
+              </div>
+            }
+          </div>
+
+          <button type="submit" class="btn btn-login w-100 mb-3" [disabled]="!form.valid || isLoading">
+            @if (isLoading) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            }
+            {{ isLoading ? 'Signing in...' : 'Sign In' }}
+          </button>
+        </form>
+
+        <div class="text-center mb-3">
+          <small>Don't have an account? <button type="button" class="btn btn-link p-0" (click)="openSignupModal()">Sign up</button></small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop -->
+@if (isModalOpen()) {
+  <div class="modal-backdrop fade show" (click)="closeModal()"></div>
+}
