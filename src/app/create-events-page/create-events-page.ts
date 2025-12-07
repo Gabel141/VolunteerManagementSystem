@@ -1,11 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, addDoc, collectionData, doc } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth'
 import { Router } from '@angular/router';
 import { ModalService } from '../services/modal.service';
-import { getDoc } from '@firebase/firestore';
+import { EventService } from '../services/event.service';
 
 @Component({
   selector: 'app-create-events-page',
@@ -15,33 +14,41 @@ import { getDoc } from '@firebase/firestore';
   styleUrls: ['./create-events-page.css'],
 })
 export class CreateEventsPage implements OnInit {
-  firestore = inject(Firestore);
   auth = inject(Auth);
   router = inject(Router);
   modalService = inject(ModalService);
+  eventService = inject(EventService);
 
   eventTitle = signal('');
   eventDate = signal('');
   eventTime = signal('');
   eventLocation = signal('');
   eventDescription = signal('');
-
-  events: any[] = [];
+  isLoading = signal(false);
+  errorMessage = signal('');
 
   ngOnInit() {
-    const eventsCollection = collection(this.firestore, 'events');
-    collectionData(eventsCollection, { idField: 'id' })
-      .subscribe(data => {
-        this.events = data;
-      });
+    const user = this.auth.currentUser;
+    if (!user) {
+      this.modalService.openModal('login');
+      return;
+    }
+
+    if (!user.emailVerified) {
+      this.modalService.openModal('unverified-email');
+    }
   }
 
-  createEvent() {
-
+  async createEvent() {
     const user = this.auth.currentUser
 
     if (!user) {
       this.modalService.openModal('login');
+      return;
+    }
+
+    if (!user.emailVerified) {
+      this.modalService.openModal('unverified-email');
       return;
     }
 
@@ -50,17 +57,40 @@ export class CreateEventsPage implements OnInit {
     const time = this.eventTime();
     const location = this.eventLocation();
     const description = this.eventDescription();
-    const creator = user.displayName
-    if (title && date && time && location && description && creator) {
-      const eventsCollection = collection(this.firestore, 'events');
-      addDoc(eventsCollection, { title, date, time, location, description, creator });
+    const creator = user.displayName || user.email || 'Unknown';
+
+    if (!title || !date || !time || !location || !description) {
+      this.errorMessage.set('Please fill in all fields');
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    try {
+      await this.eventService.createEvent({
+        title,
+        date,
+        time,
+        location,
+        description,
+        creator
+      });
+
+      // Clear form
       this.eventTitle.set('');
       this.eventDate.set('');
       this.eventTime.set('');
       this.eventLocation.set('');
       this.eventDescription.set('');
-      this.router.navigate(['/events']);
-    }
 
-}
+      // Navigate to events page
+      this.router.navigate(['/events']);
+    } catch (error: any) {
+      this.errorMessage.set(error.message || 'Failed to create event');
+      console.error('Error creating event:', error);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
 }

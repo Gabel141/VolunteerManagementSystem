@@ -1,64 +1,127 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Firestore, collection, collectionData } from '@angular/fire/firestore';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
-import { map, shareReplay, startWith } from 'rxjs/operators';
+import { Auth } from '@angular/fire/auth';
+import { EventService, EventInterface } from '../services/event.service';
+import { EventListComponent } from '../event-list/event-list';
+import { ModalService } from '../services/modal.service';
 
 @Component({
   selector: 'app-events-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, EventListComponent],
   templateUrl: './events-page.html',
   styleUrls: ['./events-page.css'],
 })
-export class EventsPage {
-  // search term as a BehaviorSubject so template can update it
-  private search$ = new BehaviorSubject<string>('');
+export class EventsPage implements OnInit {
+  auth = inject(Auth);
+  eventService = inject(EventService);
+  modalService = inject(ModalService);
 
-  // raw events observable from Firestore
-  events$: Observable<any[]>;
+  events = signal<EventInterface[]>([]);
+  filteredEvents = signal<EventInterface[]>([]);
+  searchTerm = signal('');
+  isLoading = signal(true);
+  attendingEventIds = signal<string[]>([]);
+  currentUserUid: string | undefined;
 
-  // derived filtered observable used by the template
-  filtered$!: Observable<any[]>;
+  ngOnInit() {
+    const user = this.auth.currentUser;
+    this.currentUserUid = user?.uid;
 
-  constructor(private firestore: Firestore) {
-    const eventsCol = collection(this.firestore, 'events');
-    this.events$ = collectionData(eventsCol, { idField: 'id' }).pipe(
-      // ensure stable stream and share
-      map((items: any[]) => {
-        // normalize possible createdAt and sort newest first
-        return items
-          .map(i => ({
-            ...i,
-            createdAt: i.createdAt ? new Date(i.createdAt) : null
-          }))
-          .sort((a, b) => {
-            const ta = a.createdAt ? a.createdAt.getTime() : 0;
-            const tb = b.createdAt ? b.createdAt.getTime() : 0;
-            return tb - ta;
-          });
-      }),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
+    this.loadEvents();
+  }
 
-    this.filtered$ = combineLatest([this.events$, this.search$.pipe(startWith(''))]).pipe(
-      map(([events, search]) => {
-        const q = (search || '').trim().toLowerCase();
-        if (!q) return events;
-        return events.filter(e => {
-          return (
-            (e.title && e.title.toLowerCase().includes(q)) ||
-            (e.location && e.location.toLowerCase().includes(q)) ||
-            (e.description && e.description.toLowerCase().includes(q))
-          );
-        });
-      })
-    );
+  loadEvents() {
+    this.eventService.getEvents().subscribe({
+      next: (allEvents) => {
+        this.events.set(allEvents);
+        this.filterEvents();
+        this.loadAttendingEventIds();
+      },
+      error: (error) => {
+        console.error('Error loading events:', error);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  loadAttendingEventIds() {
+    if (!this.currentUserUid) {
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.eventService.getEventsAttending().subscribe({
+      next: (attendingEvents) => {
+        this.attendingEventIds.set(attendingEvents.map(e => e.id || ''));
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading attending events:', error);
+        this.isLoading.set(false);
+      }
+    });
   }
 
   updateSearch(value: string) {
-    this.search$.next(value || '');
+    this.searchTerm.set(value);
+    this.filterEvents();
+  }
+
+  private filterEvents() {
+    const query = this.searchTerm().toLowerCase().trim();
+    if (!query) {
+      this.filteredEvents.set(this.events());
+      return;
+    }
+
+    const filtered = this.events().filter(event =>
+      event.title.toLowerCase().includes(query) ||
+      event.description.toLowerCase().includes(query) ||
+      event.location.toLowerCase().includes(query) ||
+      event.creator.toLowerCase().includes(query)
+    );
+
+    this.filteredEvents.set(filtered);
+  }
+
+  async attendEvent(event: EventInterface) {
+    if (!this.currentUserUid) {
+      this.modalService.openModal('login');
+      return;
+    }
+
+    try {
+      if (!event.id) return;
+      await this.eventService.joinEvent(event.id);
+      this.loadAttendingEventIds();
+    } catch (error) {
+      console.error('Error attending event:', error);
+      alert('Failed to attend event');
+    }
+  }
+
+  async leaveEvent(event: EventInterface) {
+    try {
+      if (!event.id) return;
+      await this.eventService.leaveEvent(event.id);
+      this.loadAttendingEventIds();
+    } catch (error) {
+      console.error('Error leaving event:', error);
+      alert('Failed to leave event');
+    }
+  }
+
+  async deleteEvent(event: EventInterface) {
+    try {
+      if (!event.id) return;
+      await this.eventService.deleteEvent(event.id);
+      this.loadEvents();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      alert('Failed to delete event');
+    }
   }
 }

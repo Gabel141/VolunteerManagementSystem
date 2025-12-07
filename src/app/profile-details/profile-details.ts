@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, collection, doc, getDoc, setDoc, updateDoc } from '@angular/fire/firestore';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -20,6 +20,7 @@ export class ProfileDetails implements OnInit {
   auth = inject(Auth);
   firestore = inject(Firestore);
   router = inject(Router);
+  route = inject(ActivatedRoute);
   modalService = inject(ModalService);
 
   // Profile fields
@@ -35,35 +36,51 @@ export class ProfileDetails implements OnInit {
   error = '';
   success = '';
   isEditing = false;
+  // UID of the profile being viewed (null = current user)
+  viewedUid: string | null = null;
+  // Whether the profile shown belongs to the logged-in user
+  isOwner = false;
 
   ngOnInit() {
+    // Read route param 'uid' if present
+    const paramUid = this.route.snapshot.paramMap.get('uid');
+    if (paramUid) {
+      this.viewedUid = paramUid;
+    }
     this.loadProfile();
   }
-
   async loadProfile(): Promise<void> {
     this.loading = true;
     try {
-      const user = this.auth.currentUser;
-      if (!user) {
-        this.error = 'No user logged in.';
-        this.modalService.openModal('login');
+      // Determine which UID to load: viewedUid (from route) or current user
+      const currentUser = this.auth.currentUser;
+      const uidToLoad = this.viewedUid ?? currentUser?.uid ?? null;
+
+      if (!uidToLoad) {
+        this.error = 'No user specified and no user logged in.';
+        if (!currentUser) this.modalService.openModal('login');
         return;
       }
 
-      const profileDoc = await getDoc(
-        doc(this.firestore, 'users', user.uid)
-      );
+      this.isOwner = !!(currentUser && currentUser.uid === uidToLoad);
+
+      const profileDoc = await getDoc(doc(this.firestore, 'users', uidToLoad));
 
       if (profileDoc.exists()) {
         const data = profileDoc.data();
         this.displayName = data['displayName'] || '';
-        this.email = data['email'] || user.email || '';
+        this.email = data['email'] || '';
         this.phone = data['phone'] || '';
         this.bio = data['bio'] || '';
         this.location = data['location'] || '';
         this.profilePicture = data['profilePicture'] || '';
       } else {
-        this.email = user.email || '';
+        // If viewing own profile but doc doesn't exist, fall back to auth info
+        if (this.isOwner && currentUser) {
+          this.email = currentUser.email || '';
+        } else {
+          this.error = 'Profile not found.';
+        }
       }
     } catch (err: any) {
       this.error = err?.message ?? 'Failed to load profile.';

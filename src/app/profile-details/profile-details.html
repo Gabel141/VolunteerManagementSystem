@@ -51,14 +51,14 @@
               <p class="profile-value profile-bio">{{ bio || 'No bio provided' }}</p>
             </div>
 
-            <div class="button-group mt-4">
+            <div class="button-group mt-4" *ngIf="isOwner">
                 <button type="button" class="btn btn-edit" (click)="toggleEdit()">Edit Profile</button>
                 <button type="button" class="btn btn-cancel" (click)="logout()">Logout</button>
             </div>
           </div>
 
           <!-- Edit Mode -->
-          <form *ngIf="!loading && isEditing" (ngSubmit)="saveProfile()" #profileForm="ngForm" novalidate>
+          <form *ngIf="!loading && isEditing && isOwner" (ngSubmit)="saveProfile()" #profileForm="ngForm" novalidate>
             <div class="mb-3">
               <label for="displayName" class="form-label">Display Name</label>
               <input type="text" class="form-control" id="displayName" name="displayName" required

@@ -1,0 +1,96 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow all reads and writes by default (adjust for production!)
+    // This is a starting template; customize based on your auth model
+
+    // Helper function to check if user is banned or muted in an event
+    function isBannedOrMuted(eventId, userId) {
+      return exists(/databases/$(database)/documents/events/$(eventId)/moderation/banned_$(userId))
+          || exists(/databases/$(database)/documents/events/$(eventId)/moderation/muted_$(userId));
+    }
+
+    // Helper to check if user is event creator
+    function isEventCreator(eventId, userId) {
+      return get(/databases/$(database)/documents/events/$(eventId)).data.creatorUid == userId;
+    }
+
+    // Helper to check if user is message author
+    function isMessageAuthor(messageId, userId) {
+      return get(/databases/$(database)/documents/events/$(resource.parent.parent.id)/messages/$(messageId)).data.senderUid == userId;
+    }
+
+    // === Events ===
+    match /events/{eventId} {
+      // Allow anyone to read events
+      allow read: if true;
+
+      // Allow authenticated users to create events
+      allow create: if request.auth != null;
+
+      // Allow event creator to update/delete their event
+      allow update, delete: if request.auth != null && resource.data.creatorUid == request.auth.uid;
+    }
+
+    // === Event Messages (Chat) ===
+    match /events/{eventId}/messages/{messageId} {
+      // Allow anyone in the event to read messages
+      allow read: if request.auth != null;
+
+      // Allow authenticated users to create messages if not banned/muted
+      allow create: if request.auth != null
+                   && !isBannedOrMuted(eventId, request.auth.uid)
+                   && request.resource.data.senderUid == request.auth.uid
+                   && request.resource.data.createdAt != null;
+
+      // Allow message author or event creator to edit (update text only)
+      allow update: if request.auth != null
+                   && (resource.data.senderUid == request.auth.uid
+                       || isEventCreator(eventId, request.auth.uid))
+                   && request.resource.data.senderUid == resource.data.senderUid
+                   && request.resource.data.createdAt == resource.data.createdAt
+                   && request.resource.data.edited == true;
+
+      // Allow message author or event creator to delete
+      allow delete: if request.auth != null
+                   && (resource.data.senderUid == request.auth.uid
+                       || isEventCreator(eventId, request.auth.uid));
+    }
+
+    // === Event Reactions (subcollection under messages) ===
+    match /events/{eventId}/messages/{messageId}/reactions/{reactionId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if request.auth != null
+                                    && !isBannedOrMuted(eventId, request.auth.uid);
+    }
+
+    // === Event Moderation (bans/mutes) ===
+    match /events/{eventId}/moderation/{docId} {
+      // Allow event creator to read moderation records
+      allow read: if request.auth != null && isEventCreator(eventId, request.auth.uid);
+
+      // Allow event creator to create/update bans and mutes
+      allow create, update: if request.auth != null && isEventCreator(eventId, request.auth.uid);
+
+      // Allow event creator to delete bans/mutes (unban/unmute)
+      allow delete: if request.auth != null && isEventCreator(eventId, request.auth.uid);
+    }
+
+    // === Presence (Realtime Database rules are separate; Firestore presence optional) ===
+    match /presence/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // === Users ===
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // === Default: Deny all other access ===
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

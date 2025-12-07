@@ -1,0 +1,80 @@
+<div class="event-chat card mt-4">
+  <div class="card-body d-flex flex-column p-2">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0">Event Chat</h6>
+      <div class="small text-muted">🟢 Online: <span class="fw-bold">{{ onlineUsers().length }}</span></div>
+    </div>
+
+    <div class="chat-messages mb-2" style="max-height:320px; overflow:auto;">
+      <button *ngIf="messages().length >= pageSize" (click)="loadOlderMessages()" class="btn btn-sm btn-link">↑ Load more</button>
+
+      <ng-container *ngFor="let m of (messages().concat(pendingMessages()))">
+        <div class="chat-message mb-3" [class.pending]="m.status === 'pending'" [class.failed]="m.status === 'failed'">
+          <div [class]="'d-flex align-items-start gap-2 ' + (isCreatorMessage(m) ? 'creator-message' : '')">
+            <div class="chat-avatar">
+              <img *ngIf="m.senderPhoto" [src]="m.senderPhoto" alt="" />
+              <div *ngIf="!m.senderPhoto" class="avatar-fallback">{{ (m.senderName || '').charAt(0) }}</div>
+            </div>
+            <div class="chat-bubble flex-fill">
+              <div class="d-flex justify-content-between align-items-start mb-1">
+                <div class="chat-meta small text-muted">{{ m.senderName }} <span *ngIf="m.edited" class="badge bg-secondary ms-1">edited</span></div>
+                <div class="chat-meta small text-muted">{{ m.createdAt ? (m.createdAt | date:'short') : '' }}</div>
+              </div>
+
+              <div *ngIf="!m._editing" class="chat-text mb-2">{{ m.text }}</div>
+              <div *ngIf="m.attachmentUrl" class="mb-2">
+                <a [href]="m.attachmentUrl" target="_blank" class="btn btn-sm btn-outline-primary">📎 {{ m.attachmentName || 'Attachment' }}</a>
+              </div>
+
+              <div *ngIf="m._editing" class="mt-2 d-flex gap-2 mb-2">
+                <input class="form-control form-control-sm" [(ngModel)]="m._editText" name="edit-{{m.id}}" />
+                <button class="btn btn-sm btn-success" (click)="editMessage(m.id, m._editText); m._editing=false">✓</button>
+                <button class="btn btn-sm btn-secondary" (click)="m._editing=false">✕</button>
+              </div>
+
+              <!-- Reactions display -->
+              <div *ngIf="m.reactions && Object.keys(m.reactions).length" class="mb-2 d-flex gap-1 flex-wrap">
+                <button *ngFor="let emoji of Object.keys(m.reactions)" (click)="toggleReaction(m.id, emoji)" class="btn btn-sm btn-outline-secondary reactions-btn">
+                  {{emoji}} <span class="ms-1">{{ m.reactions[emoji]?.length || 0 }}</span>
+                </button>
+              </div>
+
+              <div class="d-flex gap-2 align-items-center flex-wrap">
+                <div class="reactions-picker position-relative">
+                  <button class="btn btn-sm btn-light" (click)="toggleEmojiPicker()" title="Add reaction">😊</button>
+                  <div *ngIf="showEmojiPicker()" class="emoji-picker">
+                    <button *ngFor="let emoji of emojiPresets" (click)="toggleReaction(m.id, emoji)" class="emoji-btn">{{ emoji }}</button>
+                  </div>
+                </div>
+
+                <div class="ms-auto d-flex gap-1">
+                  <button *ngIf="canModifyMessage(m) && !m._editing" class="btn btn-sm btn-link text-secondary" (click)="m._editing=true; m._editText = m.text">✏️</button>
+                  <button *ngIf="canModifyMessage(m)" class="btn btn-sm btn-link text-danger" (click)="deleteMessage(m.id)">🗑️</button>
+                  <button *ngIf="creatorUid && creatorUid === (auth.currentUser?.uid) && m.senderUid !== auth.currentUser?.uid" class="btn btn-sm btn-outline-danger" (click)="banUser(m.senderUid)" title="Ban user">Ban</button>
+                  <button *ngIf="creatorUid && creatorUid === (auth.currentUser?.uid) && m.senderUid !== auth.currentUser?.uid" class="btn btn-sm btn-outline-warning" (click)="muteUser(m.senderUid)" title="Mute user">Mute</button>
+
+                  <div *ngIf="m.status === 'failed'" class="ms-2 d-inline-flex gap-1">
+                    <button class="btn btn-sm btn-outline-primary" (click)="retryPending(m.clientId)">Retry</button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="removePending(m.clientId)">Remove</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <div id="chat-end-{{eventId}}"></div>
+    </div>
+
+    <div *ngIf="errorMessage()" class="alert alert-danger py-2 mb-2">{{ errorMessage() }}</div>
+
+    <form class="d-flex gap-2 align-items-center" (submit)="$event.preventDefault(); sendMessage();">
+      <input class="form-control form-control-sm" placeholder="Write a message..." [(ngModel)]="newMessage" name="message" />
+      <input type="file" class="form-control form-control-sm w-auto" (change)="uploadAttachment($event.target.files && $event.target.files[0])" title="Upload image" />
+      <button class="btn btn-sm btn-primary" type="button" (click)="sendMessage()" [disabled]="loading() || (!newMessage() && !uploading())">Send</button>
+    </form>
+    <div *ngIf="uploading()" class="small mt-2 text-muted">Uploading: {{uploadProgress()}}%</div>
+  </div>
+</div>
+

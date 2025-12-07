@@ -2,65 +2,119 @@
     <!-- Back link -->
     <div class="row mb-3">
         <div class="col-12">
-            <a routerLink="/" class="btn btn-sm btn-outline-secondary">← Back to Events</a>
+            <a routerLink="/events" class="btn btn-sm btn-outline-secondary">← Back to Events</a>
         </div>
     </div>
 
     <!-- Loading state -->
-    <div *ngIf="loading" class="text-center py-4">
+    <div *ngIf="loading()" class="text-center py-4">
         <div class="spinner-border" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 
     <!-- Error state -->
-    <div *ngIf="!loading && error" class="alert alert-danger" role="alert">
-        {{ error }}
+    <div *ngIf="!loading() && error()" class="alert alert-danger" role="alert">
+        {{ error() }}
     </div>
 
     <!-- Event detail -->
-    <div *ngIf="!loading && event" class="row">
-        <!-- Left: Profile picture section -->
-        <div class="col-12 col-md-3 mb-3">
-            <div class="profile-thumb-box text-center">
-                <a routerLink="/profile" class="d-inline-block">
-                    <img *ngIf="profilePicture" [src]="profilePicture" class="profile-thumb img-fluid" alt="Profile" />
-                    <div *ngIf="!profilePicture" class="profile-thumb-initials">{{ displayName ? (displayName.charAt(0) | uppercase) : 'U' }}</div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Right: Event detail card -->
-        <div class="col-12 col-md-9">
-            <div class="event-detail-card card">
+    <div *ngIf="!loading() && event() as evt" class="row">
+        <!-- Left: Event Info Section -->
+        <div class="col-12 col-lg-8 mb-4">
+            <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <h3 class="card-title mb-2">{{ event.title || 'Untitled Event' }}</h3>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="card-title text-primary mb-2">{{ evt.title }}</h2>
+                            <p class="text-muted mb-0">
+                                Created by <strong>{{ evt.creator }}</strong>
+                                <span *ngIf="evt.creatorEmail" class="text-muted">({{ evt.creatorEmail }})</span>
+                            </p>
+                        </div>
+                        <div *ngIf="isCreator()" class="btn-group" role="group">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-warning text-dark"
+                                (click)="editEvent()"
+                            >
+                                ✏️ Edit
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-danger"
+                                (click)="deleteEvent()"
+                                [disabled]="isActionLoading()"
+                            >
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </div>
 
-                    <div class="event-meta mb-3">
-                        <div class="meta-item">
-                            <strong>Date:</strong> {{ event.date || 'Date TBD' }}
-                        </div>
-                        <div class="meta-item" *ngIf="event.time">
-                            <strong>Time:</strong> {{ event.time }}
-                        </div>
-                        <div class="meta-item">
-                            <strong>Location:</strong> {{ event.location || 'Location TBD' }}
-                        </div>
-                        <div class="meta-item">
-                            <strong>Creator:</strong> {{ event.creator || 'No Creator' }}
+                    <div class="event-meta mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>📅 Date:</strong> {{ evt.date }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>🕒 Time:</strong> {{ evt.time }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>📍 Location:</strong> {{ evt.location }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>👥 Participants:</strong> {{ evt.participants?.length || 0 }}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
                     <div class="event-description">
-                        <strong>Description:</strong>
-                        <p>{{ event.description || 'No description provided.' }}</p>
+                        <h5>Description</h5>
+                        <p>{{ evt.description }}</p>
                     </div>
 
-                    <div *ngIf="event.image" class="event-image mb-3">
-                        <img [src]="event.image" alt="Event" class="img-fluid">
+                    <!-- Action buttons for non-creators -->
+                    <div *ngIf="!isCreator()" class="mt-4">
+                        <button
+                            *ngIf="!isAttending()"
+                            (click)="joinEvent()"
+                            [disabled]="isActionLoading()"
+                            class="btn btn-success btn-lg w-100"
+                        >
+                            <span *ngIf="!isActionLoading()">✅ Attend Event</span>
+                            <span *ngIf="isActionLoading()">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Joining...
+                            </span>
+                        </button>
+                        <button
+                            *ngIf="isAttending()"
+                            (click)="leaveEvent()"
+                            [disabled]="isActionLoading()"
+                            class="btn btn-danger btn-lg w-100"
+                        >
+                            <span *ngIf="!isActionLoading()">❌ Leave Event</span>
+                            <span *ngIf="isActionLoading()">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Leaving...
+                            </span>
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Right: Participants Section -->
+        <div class="col-12 col-lg-4">
+            <app-participant-list [participants]="participants()"></app-participant-list>
+                        <!-- Event chat: pass event id and creator uid -->
+                        <div *ngIf="event() as evt">
+                            <app-event-chat [eventId]="evt.id" [creatorUid]="evt.creatorUid"></app-event-chat>
+                        </div>
         </div>
     </div>
 </div>

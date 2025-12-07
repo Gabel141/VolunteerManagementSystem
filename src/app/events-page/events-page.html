@@ -1,32 +1,51 @@
 <div class="events-viewport container py-4">
 	<div class="row">
 		<div class="col-12">
-			<!-- Search bar -->
-			<div class="mb-3">
-				<input type="search" class="form-control search-input" placeholder="Search events by title, location, or description"
-							 (input)="updateSearch($any($event.target).value)" />
+			<!-- Header -->
+			<div class="mb-4">
+				<h2 class="text-primary mb-3">🎯 Browse Events</h2>
+				<div class="d-flex gap-2 mb-3">
+					<button class="btn btn-primary" routerLink="/my-events">
+						📋 My Events
+					</button>
+					<button class="btn btn-info" routerLink="/attending">
+						🎉 Attending
+					</button>
+					<button class="btn btn-success" routerLink="/create-event">
+						➕ Create Event
+					</button>
+				</div>
 			</div>
 
-			<!-- Gray bar header above list (as in wireframe) -->
-			<div class="list-header mb-2">Events</div>
+			<!-- Search bar -->
+			<div class="mb-4">
+				<input
+					type="search"
+					class="form-control form-control-lg search-input"
+					placeholder="Search events by title, location, or description..."
+					[value]="searchTerm()"
+					(input)="updateSearch($any($event.target).value)"
+				/>
+			</div>
+
+			<!-- Loading state -->
+			<div *ngIf="isLoading()" class="text-center py-4">
+				<div class="spinner-border text-primary" role="status">
+					<span class="visually-hidden">Loading...</span>
+				</div>
+			</div>
 
 			<!-- Events list -->
-			<div class="events-list">
-				<div *ngIf="(filtered$ | async) as items">
-					<div *ngIf="items.length === 0" class="no-results">No events found.</div>
-					<a *ngFor="let ev of items" [routerLink]="['/event-details', ev.id]" class="event-item card mb-3 text-decoration-none">
-						<div class="card-body">
-							<div class="d-flex justify-content-between align-items-start">
-								<div>
-									<h5 class="event-title mb-1">{{ ev.title }}</h5>
-									<div class="text-muted small">{{ ev.location }} &middot; {{ ev.date }} {{ ev.time }}</div>
-								</div>
-							</div>
-							<p class="mt-2 event-desc">{{ ev.description }}</p>
-							Click to view more!
-						</div>
-					</a>
-				</div>
+			<div *ngIf="!isLoading()">
+				<app-event-list
+					[events]="filteredEvents()"
+					[currentUserUid]="currentUserUid"
+					[attendingEventIds]="attendingEventIds()"
+					[emptyMessage]="'No events found. Try adjusting your search.'"
+					[onAttend]="attendEvent.bind(this)"
+					[onLeave]="leaveEvent.bind(this)"
+					[onDelete]="deleteEvent.bind(this)"
+				></app-event-list>
 			</div>
 		</div>
 	</div>

@@ -1,56 +1,98 @@
 <div class="container py-4">
 	<div class="row justify-content-start">
-		<div class="col-12 col-lg-10">
-			<div class="card">
+		<div class="col-12 col-lg-8">
+			<div class="card shadow-sm">
 				<div class="card-body">
-					<h4 class="card-title mb-3">Create Event</h4>
+					<h3 class="card-title mb-4 text-primary">➕ Create New Event</h3>
+
+					<div *ngIf="errorMessage()" class="alert alert-danger" role="alert">
+						{{ errorMessage() }}
+					</div>
 
 					<form (ngSubmit)="createEvent()" #eventForm="ngForm" novalidate>
-
-						<div class="mb-3" style="max-width: 70%">					
-							<input type="text" class="form-control" required
-							[value]="eventTitle()"
-							(input)="eventTitle.set($any($event.target).value)"
-							placeholder="Title, example: Community Cleanup"
-							> 
+						<div class="mb-3">
+							<label for="title" class="form-label">Event Title *</label>
+							<input
+								id="title"
+								type="text"
+								class="form-control"
+								required
+								[value]="eventTitle()"
+								(input)="eventTitle.set($any($event.target).value)"
+								placeholder="e.g., Community Cleanup, Basketball Tournament"
+							>
 						</div>
 
-						<div class="mb-3 ms-4" style="max-width: 60%">					
-							<input type="text" class="form-control" required
-							[value]="eventLocation()"
-							(input)="eventLocation.set($any($event.target).value)"
-							placeholder="Location"
-							> 
+						<div class="mb-3">
+							<label for="description" class="form-label">Description *</label>
+							<textarea
+								id="description"
+								class="form-control"
+								rows="5"
+								required
+								[value]="eventDescription()"
+								(input)="eventDescription.set($any($event.target).value)"
+								placeholder="Describe your event in detail..."
+							></textarea>
 						</div>
 
-						<div class="mb-3" style="margin-left:0.5rem; margin-right:0.5rem;">					
-							<input type="text" name="description" type="textarea" class="form-control" style="padding-bottom: 150px"
-							[value]="eventDescription()"
-							(input)="eventDescription.set($any($event.target).value)"
-							placeholder="Descirption">
-						</div>
-						
-						<div class="mb-3 ms-2" style="max-width: 20%">					
-							<input type="text" class="form-control" required
-							[value]="eventTime()"
-							(input)="eventTime.set($any($event.target).value)"
-							placeholder="Time"
-							> 
-						</div>
-
-						<!-- Bottom row: small input on left, button on right -->
-						<div class="d-flex align-items-center">
-							<div style="flex:1; max-width:40%;">
-								<label for="date" class="form-label visually-hidden">Date</label>
-								<input id="date" name="date" type="date" class="form-control"
-								(input)="eventDate.set($any($event.target).value)" 
-								[value]="eventDate()" />
+						<div class="row">
+							<div class="col-md-6 mb-3">
+								<label for="location" class="form-label">Location *</label>
+								<input
+									id="location"
+									type="text"
+									class="form-control"
+									required
+									[value]="eventLocation()"
+									(input)="eventLocation.set($any($event.target).value)"
+									placeholder="Event location"
+								>
 							</div>
-							<div style="flex:0 0 auto; margin-left:auto;">
-								<button (click)="createEvent()" class="btn btn-primary">Create</button>
+
+							<div class="col-md-6 mb-3">
+								<label for="date" class="form-label">Date *</label>
+								<input
+									id="date"
+									type="date"
+									class="form-control"
+									required
+									(input)="eventDate.set($any($event.target).value)"
+									[value]="eventDate()"
+								/>
 							</div>
 						</div>
 
+						<div class="mb-4">
+							<label for="time" class="form-label">Time *</label>
+							<input
+								id="time"
+								type="time"
+								class="form-control"
+								required
+								[value]="eventTime()"
+								(input)="eventTime.set($any($event.target).value)"
+								placeholder="Event time"
+							>
+						</div>
+
+						<div class="d-flex gap-2">
+							<button
+								type="button"
+								(click)="createEvent()"
+								class="btn btn-primary btn-lg"
+								[disabled]="isLoading()"
+							>
+								<span *ngIf="!isLoading()">✅ Create Event</span>
+								<span *ngIf="isLoading()">
+									<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+									Creating...
+								</span>
+							</button>
+							<a routerLink="/events" class="btn btn-outline-secondary btn-lg">
+								Cancel
+							</a>
+						</div>
 					</form>
 				</div>
 			</div>

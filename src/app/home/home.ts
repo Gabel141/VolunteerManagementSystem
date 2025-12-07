@@ -3,11 +3,12 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { ModalService } from '../services/modal.service';
+import { UserGridComponent } from '../user-grid/user-grid';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UserGridComponent],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

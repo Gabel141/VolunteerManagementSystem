@@ -13,31 +13,17 @@
           <a class="nav-link" routerLink="/events" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">Events</a>
         </li>
 
-        @if (authService.currentUserSig()) {
-          <li class="nav-item">
-            <a class="nav-link" routerLink="/create-event" routerLinkActive="active">Create Event</a>
-          </li>
-        }
+        <li *ngIf="!authService.currentUserSig()" class="nav-item d-flex gap-2">
+          <button class="btn btn-nav-login" (click)="openLoginModal()">Login</button>
+          <button class="btn btn-nav-signup" (click)="openSignupModal()">Sign Up</button>
+        </li>
 
-        @if (authService.currentUserSig() == null) {
-          <li class="nav-item">
-            <button class="btn btn-nav-login" (click)="openLoginModal()">Login</button>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-nav-signup" (click)="openSignupModal()">Sign Up</button>
-          </li>
-        }
-
-        @if (authService.currentUserSig()) {
-          <li class="nav-item">
-            <a class="nav-link" routerLink="/profile" routerLinkActive="active" title="View Profile">
-              <span class="profile-circle">👤</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-nav-logout" (click)="logout()">Logout</button>
-          </li>
-        }
+        <li *ngIf="authService.currentUserSig()" class="nav-item d-flex align-items-center gap-2">
+          <a class="nav-link" [routerLink]="['/profile', getCurrentUserUid()]" routerLinkActive="active" title="View Profile">
+            <span class="profile-circle">👤</span>
+          </a>
+          <button class="btn btn-nav-logout" (click)="logout()">Logout</button>
+        </li>
       </ul>
     </div>
   </div>
@@ -46,5 +32,6 @@
 <router-outlet></router-outlet>
 
 <!-- Modals -->
+<app-unverified-email-modal></app-unverified-email-modal>
 <app-login-modal></app-login-modal>
 <app-signup-modal></app-signup-modal>

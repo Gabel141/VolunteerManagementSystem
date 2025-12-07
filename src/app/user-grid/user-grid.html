@@ -1,0 +1,16 @@
+<div class="user-grid container py-4">
+  <h3 class="mb-3">Community Members</h3>
+  <div class="row g-3">
+    <ng-container *ngIf="users$ | async as users">
+      <div *ngFor="let user of users" class="col-6 col-sm-4 col-md-3 col-lg-2 text-center">
+        <a [routerLink]="['/profile', user.uid]" class="d-block text-decoration-none text-dark">
+          <div class="avatar shadow-sm mx-auto mb-2">
+            <img *ngIf="user.profilePicture" [src]="user.profilePicture" alt="{{user.displayName}}"/>
+            <div *ngIf="!user.profilePicture" class="avatar-fallback">{{ getInitials(user.displayName) }}</div>
+          </div>
+          <div class="user-name small">{{ user.displayName || (user.email || 'Unknown') }}</div>
+        </a>
+      </div>
+    </ng-container>
+  </div>
+</div>
