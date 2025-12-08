@@ -25,38 +25,17 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="d-flex gap-3 align-items-center">
+                        <div class="d-flex gap-3 align-items-center flex-grow-1">
                             <div class="creator-avatar me-2">
                                 <img *ngIf="creatorProfile?.profilePicture" [src]="creatorProfile?.profilePicture" alt="{{ creatorProfile?.displayName }}" class="rounded-circle" style="width:56px;height:56px;object-fit:cover;" />
                                 <div *ngIf="!creatorProfile?.profilePicture" class="avatar-fallback rounded-circle" style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--sunlit-clay),var(--copperwood));color:var(--cornsilk);font-weight:700;">{{ (creatorProfile?.displayName||evt.creator||'?').charAt(0) }}</div>
                             </div>
-                            <div>
+                            <div class="flex-grow-1">
                                 <h2 class="card-title text-primary mb-2">{{ evt.title }}</h2>
                                 <p class="text-muted mb-0">
                                     Created by <strong>{{ creatorProfile?.displayName || evt.creator }}</strong>
                                     <span *ngIf="evt.creatorEmail" class="text-muted">({{ evt.creatorEmail }})</span>
                                 </p>
-                            </div>
-                        </div>
-                        <div *ngIf="isCreator()" class="mt-2 mt-lg-0">
-                            <div class="d-flex flex-column flex-sm-row gap-2">
-                                <button
-                                    type="button"
-                                    class="btn btn-warning text-dark btn-sm"
-                                    (click)="editEvent()"
-                                    style="white-space: nowrap;"
-                                >
-                                    ✏️ Edit
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-danger btn-sm"
-                                    (click)="deleteEvent()"
-                                    [disabled]="isActionLoading()"
-                                    style="white-space: nowrap;"
-                                >
-                                    🗑️ Delete
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -117,7 +96,28 @@
                         <p>{{ evt.description }}</p>
                     </div>
 
-                    <!-- Action buttons for non-creators -->
+                    <!-- Creator action buttons - moved below description -->
+                    <div *ngIf="isCreator()" class="mt-4 mb-4">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <button
+                                type="button"
+                                class="btn btn-warning text-dark btn-sm flex-grow-1"
+                                (click)="editEvent()"
+                                style="white-space: nowrap; padding: 0.5rem 1rem;"
+                            >
+                                ✏️ Edit Event
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-danger btn-sm flex-grow-1"
+                                (click)="deleteEvent()"
+                                [disabled]="isActionLoading()"
+                                style="white-space: nowrap; padding: 0.5rem 1rem;"
+                            >
+                                🗑️ Delete Event
+                            </button>
+                        </div>
+                    </div>
                     <div *ngIf="!isCreator()" class="mt-4">
                         <button
                             *ngIf="!isAttending()"
