@@ -22,14 +22,14 @@ import { EventListComponent } from '../event-list/event-list';
         <p class="mb-0">Please verify your email to attend events.</p>
       </div>
 
-      <div *ngIf="isLoading" class="text-center py-5">
+      <div *ngIf="isLoading()" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
         <p class="text-muted mt-3">Loading your events...</p>
       </div>
 
-      <div *ngIf="!isLoading && attendingEvents().length === 0 && isVerified" class="text-center py-5">
+      <div *ngIf="!isLoading() && attendingEvents().length === 0 && isVerified" class="text-center py-5">
         <div class="mb-4">
           <span style="font-size: 3rem;">🔍</span>
         </div>
@@ -41,7 +41,7 @@ import { EventListComponent } from '../event-list/event-list';
       </div>
 
       <app-event-list
-        *ngIf="!isLoading && attendingEvents().length > 0"
+        *ngIf="!isLoading() && attendingEvents().length > 0"
         [events]="attendingEvents()"
         [currentUserUid]="currentUserUid"
         [attendingEventIds]="attendingEventIds()"
