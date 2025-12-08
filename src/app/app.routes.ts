@@ -13,6 +13,7 @@ export const routes: Routes = [
   { path: 'events', component: EventsPage },
   { path: 'event-details/:id', component: EventDetails },
   { path: 'create-event', component: CreateEventsPage, canActivate: [verifiedUserGuard] },
+  { path: 'edit-event/:id', component: CreateEventsPage, canActivate: [verifiedUserGuard] },
   { path: 'my-events', component: MyEventsPage, canActivate: [verifiedUserGuard] },
   { path: 'attending', component: AttendingEventsPage, canActivate: [verifiedUserGuard] },
   { path: 'profile', component: ProfileDetails },

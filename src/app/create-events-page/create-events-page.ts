@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '@angular/fire/auth'
-import { RouterModule,Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ModalService } from '../services/modal.service';
 import { EventService } from '../services/event.service';
 import { UserService } from '../services/user.service';
@@ -17,11 +17,14 @@ import { UserService } from '../services/user.service';
 export class CreateEventsPage implements OnInit {
   auth = inject(Auth);
   router = inject(Router);
+  route = inject(ActivatedRoute);
   modalService = inject(ModalService);
   eventService = inject(EventService);
   userService = inject(UserService);
 
   dateToday = new Date();
+  isEditMode = signal(false);
+  editEventId = signal<string | null>(null);
 
   eventTitle = signal('');
   eventDate = signal('');
@@ -46,6 +49,48 @@ export class CreateEventsPage implements OnInit {
     if (!user.emailVerified) {
       this.modalService.openModal('unverified-email');
     }
+
+    // Check if we're in edit mode
+    this.route.params.subscribe(async (params) => {
+      if (params['id']) {
+        this.editEventId.set(params['id']);
+        this.isEditMode.set(true);
+        await this.loadEventForEdit(params['id']);
+      }
+    });
+  }
+
+  private async loadEventForEdit(eventId: string): Promise<void> {
+    this.isLoading.set(true);
+    try {
+      const event = await this.eventService.getEvent(eventId);
+      if (event) {
+        this.eventTitle.set(event.title);
+        this.eventDescription.set(event.description);
+        this.eventLocation.set(event.location);
+        this.eventDate.set(this.formatDateForInput(event.date));
+        this.eventTime.set(event.time);
+        if (event.latitude) this.eventLatitude.set(event.latitude.toString());
+        if (event.longitude) this.eventLongitude.set(event.longitude.toString());
+        if (event.workType) this.eventWorkType.set(event.workType);
+        if (event.memberCap) this.eventMemberCap.set(event.memberCap.toString());
+      } else {
+        this.errorMessage.set('Event not found');
+      }
+    } catch (error: any) {
+      this.errorMessage.set(error.message || 'Failed to load event');
+      console.error('Error loading event for edit:', error);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  private formatDateForInput(date: any): string {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   // Get today's date in YYYY-MM-DD format for date input min attribute
@@ -146,7 +191,18 @@ export class CreateEventsPage implements OnInit {
       if (workType) eventData.workType = workType;
       if (memberCap !== undefined) eventData.memberCap = memberCap;
 
-      await this.eventService.createEvent(eventData);
+      if (this.isEditMode()) {
+        // Update existing event
+        const eventId = this.editEventId();
+        if (!eventId) {
+          this.errorMessage.set('Event ID is missing');
+          return;
+        }
+        await this.eventService.updateEvent(eventId, eventData);
+      } else {
+        // Create new event
+        await this.eventService.createEvent(eventData);
+      }
 
       // Clear form
       this.eventTitle.set('');
@@ -160,8 +216,8 @@ export class CreateEventsPage implements OnInit {
       // Navigate to events page
       this.router.navigate(['/events']);
     } catch (error: any) {
-      this.errorMessage.set(error.message || 'Failed to create event');
-      console.error('Error creating event:', error);
+      this.errorMessage.set(error.message || 'Failed to save event');
+      console.error('Error saving event:', error);
     } finally {
       this.isLoading.set(false);
     }

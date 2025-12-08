@@ -3,7 +3,10 @@
 		<div class="col-12 col-lg-8">
 			<div class="card shadow-sm">
 				<div class="card-body">
-					<h3 class="card-title mb-4 text-primary">➕ Create New Event</h3>
+					<h3 class="card-title mb-4 text-primary">
+						<span *ngIf="!isEditMode()">➕ Create New Event</span>
+						<span *ngIf="isEditMode()">✏️ Edit Event</span>
+					</h3>
 
 					<div *ngIf="errorMessage()" class="alert alert-danger" role="alert">
 						{{ errorMessage() }}
@@ -114,10 +117,12 @@
 								class="btn btn-primary btn-lg"
 								[disabled]="isLoading() || dateError() !== ''"
 							>
-								<span *ngIf="!isLoading()">✅ Create Event</span>
+								<span *ngIf="!isLoading() && !isEditMode()">✅ Create Event</span>
+								<span *ngIf="!isLoading() && isEditMode()">💾 Save Changes</span>
 								<span *ngIf="isLoading()">
 									<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-									Creating...
+									<span *ngIf="!isEditMode()">Creating...</span>
+									<span *ngIf="isEditMode()">Saving...</span>
 								</span>
 							</button>
 							<a routerLink="/events" class="btn btn-outline-secondary btn-lg">
