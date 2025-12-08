@@ -21,6 +21,8 @@ export class CreateEventsPage implements OnInit {
   eventService = inject(EventService);
   userService = inject(UserService);
 
+  dateToday = new Date();
+
   eventTitle = signal('');
   eventDate = signal('');
   eventTime = signal('');
@@ -91,7 +93,7 @@ export class CreateEventsPage implements OnInit {
     }
 
     const title = this.eventTitle();
-    const date = this.eventDate();
+    const date = new Date(this.eventDate());
     const time = this.eventTime();
     const location = this.eventLocation();
     const latitude = parseFloat(this.eventLatitude() || '') || undefined;
@@ -100,6 +102,11 @@ export class CreateEventsPage implements OnInit {
     const memberCap = this.eventMemberCap() ? parseInt(this.eventMemberCap()) : undefined;
     const description = this.eventDescription();
     const creator = user.displayName || user.email || 'Unknown';
+
+    if (date < this.dateToday) {
+      this.errorMessage.set('Date has already passed!');
+      return;
+    }
 
     if (!title || !date || !time || !location || !description) {
       this.errorMessage.set('Please fill in all required fields');
