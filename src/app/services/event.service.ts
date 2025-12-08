@@ -18,6 +18,7 @@ export interface EventInterface {
   latitude?: number;
   longitude?: number;
   workType?: string;
+  memberCap?: number;
   participants?: string[];
   createdAt?: any;
   updatedAt?: any;
@@ -188,6 +189,12 @@ export class EventService {
     }
 
     const participants = event.participants || [];
+    
+    // Check member cap if set
+    if (event.memberCap && participants.length >= event.memberCap) {
+      throw new Error(`Event is full (${event.memberCap} participants)`);
+    }
+
     if (!participants.includes(user.uid)) {
       participants.push(user.uid);
       const eventRef = doc(this.firestore, 'events', eventId);

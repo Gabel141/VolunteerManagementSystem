@@ -28,6 +28,7 @@ export class CreateEventsPage implements OnInit {
   eventLatitude = signal('');
   eventLongitude = signal('');
   eventWorkType = signal('');
+  eventMemberCap = signal('');
   eventDescription = signal('');
   isLoading = signal(false);
   errorMessage = signal('');
@@ -64,6 +65,7 @@ export class CreateEventsPage implements OnInit {
     const latitude = parseFloat(this.eventLatitude() || '') || undefined;
     const longitude = parseFloat(this.eventLongitude() || '') || undefined;
     const workType = this.eventWorkType();
+    const memberCap = this.eventMemberCap() ? parseInt(this.eventMemberCap()) : undefined;
     const description = this.eventDescription();
     const creator = user.displayName || user.email || 'Unknown';
 
@@ -98,6 +100,7 @@ export class CreateEventsPage implements OnInit {
       if (latitude !== undefined) eventData.latitude = latitude;
       if (longitude !== undefined) eventData.longitude = longitude;
       if (workType) eventData.workType = workType;
+      if (memberCap !== undefined) eventData.memberCap = memberCap;
 
       await this.eventService.createEvent(eventData);
 
@@ -107,6 +110,8 @@ export class CreateEventsPage implements OnInit {
       this.eventTime.set('');
       this.eventLocation.set('');
       this.eventDescription.set('');
+      this.eventMemberCap.set('');
+      this.eventWorkType.set('');
 
       // Navigate to events page
       this.router.navigate(['/events']);

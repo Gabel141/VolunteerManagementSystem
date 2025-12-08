@@ -1,33 +1,85 @@
-<nav class="navbar navbar-expand-lg navbar-custom">
+<nav class="navbar navbar-expand-lg navbar-custom shadow-sm">
   <div class="container-fluid">
-    <a class="navbar-brand" routerLink="/">VolunteerHub</a>
+    <!-- Brand -->
+    <a class="navbar-brand fw-bold" routerLink="/">VolunteerHub</a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <!-- Hamburger menu button for mobile -->
+    <button class="navbar-toggler border-0" type="button" (click)="toggleSidebar()" aria-controls="sidebar" [attr.aria-expanded]="sidebarOpen()">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
+    <!-- Desktop Navigation -->
+    <div class="navbar-collapse d-none d-lg-flex ms-auto">
+      <ul class="navbar-nav align-items-center">
         <li class="nav-item">
-          <a class="nav-link" routerLink="/events" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">Events</a>
+          <a class="nav-link" routerLink="/events" routerLinkActive="active">Events</a>
         </li>
 
-        <li *ngIf="!authService.currentUserSig()" class="nav-item d-flex gap-2">
+        <!-- Unauthenticated: Login/Signup buttons -->
+        <li *ngIf="!authService.currentUserSig()" class="nav-item d-flex gap-2 ms-3">
           <button class="btn btn-nav-login" (click)="openLoginModal()">Login</button>
           <button class="btn btn-nav-signup" (click)="openSignupModal()">Sign Up</button>
         </li>
 
-        <li *ngIf="authService.currentUserSig()" class="nav-item d-flex align-items-center gap-2">
-          <a class="nav-link d-flex align-items-center" [routerLink]="['/profile', getCurrentUserUid()]" routerLinkActive="active" title="View Profile">
-            <img *ngIf="currentUserProfile?.profilePicture" [src]="currentUserProfile?.profilePicture" alt="Profile" class="rounded-circle me-2" style="width:36px;height:36px;object-fit:cover;" />
-            <span *ngIf="!currentUserProfile?.profilePicture" class="profile-circle">👤</span>
+        <!-- Authenticated: Profile picture and logout -->
+        <li *ngIf="authService.currentUserSig()" class="nav-item d-flex align-items-center gap-3 ms-3">
+          <!-- Profile picture / loading placeholder -->
+          <a class="nav-profile-link" [routerLink]="['/profile', getCurrentUserUid()]" title="View Profile">
+            <!-- Profile picture with fade-in -->
+            <img *ngIf="currentUserProfile() && currentUserProfile()?.profilePicture" [src]="currentUserProfile()?.profilePicture" alt="Profile" class="nav-profile-img loaded" />
+            <!-- Loading skeleton -->
+            <div *ngIf="!currentUserProfile() || !currentUserProfile()?.profilePicture" class="nav-profile-img-skeleton"></div>
           </a>
           <button class="btn btn-nav-logout" (click)="logout()">Logout</button>
         </li>
       </ul>
     </div>
   </div>
+</nav>
+
+<!-- Sidebar Drawer (Mobile Navigation) -->
+<div class="sidebar-overlay" *ngIf="sidebarOpen()" (click)="closeSidebar()"></div>
+<nav class="sidebar-drawer" [class.open]="sidebarOpen()">
+  <div class="sidebar-header d-flex justify-content-between align-items-center">
+    <h5 class="m-0">Menu</h5>
+    <button class="btn-close-sidebar" (click)="closeSidebar()" aria-label="Close menu">
+      <span>&times;</span>
+    </button>
+  </div>
+
+  <ul class="sidebar-nav">
+    <li class="sidebar-nav-item">
+      <a class="sidebar-nav-link" routerLink="/events" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="icon">📋</span> Events
+      </a>
+    </li>
+
+    <!-- Authenticated sidebar items -->
+    <li *ngIf="authService.currentUserSig()" class="sidebar-nav-item">
+      <a class="sidebar-nav-link" [routerLink]="['/profile', getCurrentUserUid()]" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="icon">👤</span> My Profile
+      </a>
+    </li>
+
+    <li *ngIf="authService.currentUserSig()" class="sidebar-nav-item">
+      <a class="sidebar-nav-link" routerLink="/my-events" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="icon">📌</span> My Events
+      </a>
+    </li>
+
+    <!-- Unauthenticated sidebar items -->
+    <li *ngIf="!authService.currentUserSig()" class="sidebar-nav-item">
+      <button class="btn btn-sidebar-auth w-100" (click)="openLoginModal(); closeSidebar()">Login</button>
+    </li>
+    <li *ngIf="!authService.currentUserSig()" class="sidebar-nav-item">
+      <button class="btn btn-sidebar-auth btn-sidebar-signup w-100" (click)="openSignupModal(); closeSidebar()">Sign Up</button>
+    </li>
+
+    <!-- Authenticated logout -->
+    <li *ngIf="authService.currentUserSig()" class="sidebar-nav-item border-top mt-3 pt-3">
+      <button class="btn btn-sidebar-logout w-100" (click)="logout(); closeSidebar()">Logout</button>
+    </li>
+  </ul>
 </nav>
 
 <router-outlet></router-outlet>

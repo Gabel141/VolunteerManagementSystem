@@ -154,13 +154,16 @@ export class ProfileDetails implements OnInit {
   }
 
   uploadProgress = 0;
+  uploadingPicture = false;
 
   async uploadProfilePicture(file: File | null): Promise<void> {
     if (!file) return;
     this.error = '';
+    this.success = '';
+
     const maxBytes = 5 * 1024 * 1024; // 5 MB
     if (!file.type || !file.type.startsWith('image/')) {
-      this.error = 'Only image files are allowed.';
+      this.error = 'Only image files are allowed (JPG, PNG, WebP, etc.).';
       return;
     }
     if (file.size > maxBytes) {
@@ -168,7 +171,7 @@ export class ProfileDetails implements OnInit {
       return;
     }
 
-    this.loading = true;
+    this.uploadingPicture = true;
     this.uploadProgress = 0;
 
     try {
@@ -185,26 +188,44 @@ export class ProfileDetails implements OnInit {
           this.uploadProgress = Math.round(progress);
         },
         (err) => {
-          this.loading = false;
+          this.uploadingPicture = false;
+          this.uploadProgress = 0;
           this.error = err?.message ?? 'Upload failed.';
+          console.error('Upload error:', err);
         },
         async () => {
           try {
             const url = await getDownloadURL(uploadTask.snapshot.ref);
+            // Update local state immediately for instant UI feedback
             this.profilePicture = url;
-            await setDoc(doc(this.firestore, 'users', user.uid), { profilePicture: url }, { merge: true } as any);
-            this.success = 'Profile picture uploaded.';
-          } catch (e: any) {
-            this.error = e?.message ?? 'Upload finalize failed.';
-          } finally {
-            this.loading = false;
+
+            // Update Firestore with the new URL
+            await updateDoc(doc(this.firestore, 'users', user.uid), {
+              profilePicture: url,
+              updatedAt: new Date().toISOString()
+            });
+
+            this.success = 'Profile picture uploaded successfully!';
             this.uploadProgress = 100;
+
+            // Reset after brief delay
+            setTimeout(() => {
+              this.uploadingPicture = false;
+              this.uploadProgress = 0;
+            }, 800);
+          } catch (e: any) {
+            this.uploadingPicture = false;
+            this.uploadProgress = 0;
+            this.error = e?.message ?? 'Failed to save profile picture. Please try again.';
+            console.error('Finalize error:', e);
           }
         }
       );
     } catch (err: any) {
-      this.loading = false;
-      this.error = err?.message ?? 'Upload failed.';
+      this.uploadingPicture = false;
+      this.uploadProgress = 0;
+      this.error = err?.message ?? 'Upload failed. Please try again.';
+      console.error('Upload init error:', err);
     }
   }
 

@@ -73,6 +73,19 @@
 									[value]="eventDate()"
 								/>
 							</div>
+
+							<div class="col-md-6 mb-3">
+								<label for="memberCap" class="form-label">Member Cap (Optional)</label>
+								<input
+									id="memberCap"
+									type="number"
+									class="form-control"
+									min="1"
+									(input)="eventMemberCap.set($any($event.target).value)"
+									[value]="eventMemberCap()"
+									placeholder="Max participants (leave blank for no limit)"
+								>
+							</div>
 						</div>
 
 						<div class="mb-4">

@@ -137,6 +137,25 @@ export class EventDetails implements OnInit {
     }
   }
 
+  isEventFull(): boolean {
+    const currentEvent = this.event();
+    if (!currentEvent || !currentEvent.memberCap || !currentEvent.participants) {
+      return false;
+    }
+    return currentEvent.participants.length >= currentEvent.memberCap;
+  }
+
+  getParticipantCountText(): string {
+    const currentEvent = this.event();
+    if (!currentEvent) return '';
+
+    const count = currentEvent.participants?.length || 0;
+    if (currentEvent.memberCap) {
+      return `${count} / ${currentEvent.memberCap}`;
+    }
+    return `${count}`;
+  }
+
   async leaveEvent(): Promise<void> {
     const currentEvent = this.event();
     if (!currentEvent?.id) return;

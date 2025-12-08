@@ -101,6 +101,38 @@
   margin-bottom: 0.5rem;
 }
 
+/* Upload picture zone */
+.upload-picture-zone {
+  border: 2px dashed var(--sunlit-clay);
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: rgba(221, 161, 94, 0.05);
+  transition: all 0.2s ease;
+}
+
+.upload-picture-zone:hover {
+  background-color: rgba(221, 161, 94, 0.1);
+  border-color: var(--copperwood);
+}
+
+.upload-picture-zone .form-control {
+  border: none;
+  background: transparent;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.upload-picture-zone .form-control:focus {
+  box-shadow: none;
+  background: transparent;
+}
+
+.upload-picture-zone small {
+  display: block;
+  margin-top: 0.5rem;
+  color: #6c757d;
+}
+
 /* Button Group */
 .button-group {
   display: flex;
