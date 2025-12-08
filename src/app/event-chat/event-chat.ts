@@ -49,6 +49,7 @@ export class EventChatComponent implements OnDestroy {
   uploadProgress = signal(0);
   showEmojiPicker = signal(false);
   onlineUsers = signal<any[]>([]);
+  showOnlineList = signal(false);
 
   pageSize = 25;
   pageIncrement = 25;
@@ -476,30 +477,52 @@ export class EventChatComponent implements OnDestroy {
       const user = this.auth.currentUser;
       if (!user || !this.eventId) return;
       const db = getDatabase();
-      const path = `presence/${this.eventId}/${user.uid}`;
-      const myRef = rtdbRef(db, path);
 
-      // set online and register onDisconnect to mark offline
-      rtdbSet(myRef, { online: true, displayName: user.displayName || user.email || '', lastSeen: rtdbServerTimestamp() }).catch(() => {});
-      onDisconnect(myRef).set({ online: false, lastSeen: rtdbServerTimestamp() }).catch(() => {});
+      const presenceRef = rtdbRef(db, `presence/${this.eventId}/${user.uid}`);
+      const connectedRef = rtdbRef(db, '.info/connected');
 
-      // listen to presence list for this event
+      // When connected, write presence and ensure it's removed on disconnect
+      const connectedListener = (snap: any) => {
+        if (snap.val() === true) {
+          // write a small object (can be extended with lastSeen)
+          rtdbSet(presenceRef, { displayName: user.displayName || user.email || '' }).catch(() => {});
+          onDisconnect(presenceRef).remove().catch(() => {});
+        }
+      };
+      onValue(connectedRef, connectedListener);
+
+      // listen to presence list for this event; if a child exists it's considered online
       const listRef = rtdbRef(db, `presence/${this.eventId}`);
       const listener = (snapshot: any) => {
         const val = snapshot.val() || {};
         const users = Object.keys(val).map(k => ({ uid: k, ...val[k] }));
-        this.onlineUsers.set(users.filter((u: any) => u.online));
+        this.onlineUsers.set(users);
       };
       onValue(listRef, listener);
-      this.rtdbListener = () => { rtdbOff(listRef, 'value', listener); };
+
+      // store cleanup to remove listeners and remove our presence node
+      this.rtdbListener = () => {
+        try { rtdbOff(connectedRef, 'value', connectedListener); } catch (e) {}
+        try { rtdbOff(listRef, 'value', listener); } catch (e) {}
+        try { rtdbSet(presenceRef, null); } catch (e) {}
+      };
 
       // Best-effort cleanup on unload
       window.addEventListener('beforeunload', () => {
-        try { rtdbSet(myRef, { online: false, lastSeen: rtdbServerTimestamp() }); } catch (e) {}
+        try { rtdbSet(presenceRef, null); } catch (e) {}
       });
     } catch (e) {
       console.warn('RTDB presence init failed', e);
     }
+  }
+
+  isUserOnline(uid?: string): boolean {
+    if (!uid) return false;
+    return this.onlineUsers().some(u => u.uid === uid);
+  }
+
+  toggleOnlineList() {
+    this.showOnlineList.update(v => !v);
   }
 
   ngOnDestroy() {

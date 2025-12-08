@@ -10,7 +10,7 @@ import { UserGridComponent } from '../user-grid/user-grid';
   standalone: true,
   imports: [CommonModule, UserGridComponent],
   templateUrl: './home.html',
-  styleUrl: './home.css',
+  styleUrls: ['./home.css'],
 })
 export class Home {
   authService = inject(AuthService);
