@@ -51,6 +51,18 @@
 							</div>
 
 							<div class="col-md-6 mb-3">
+								<label for="workType" class="form-label">Work Type</label>
+								<select id="workType" class="form-select" (change)="eventWorkType.set($any($event.target).value)" [value]="eventWorkType()">
+									<option value="">Select type (e.g., Cleanup, Tutoring, Food Drive)</option>
+									<option value="cleanup">Cleanup</option>
+									<option value="mentoring">Mentoring</option>
+									<option value="food_drive">Food Drive</option>
+									<option value="construction">Construction / Repair</option>
+									<option value="other">Other</option>
+								</select>
+							</div>
+
+							<div class="col-md-6 mb-3">
 								<label for="date" class="form-label">Date *</label>
 								<input
 									id="date"
@@ -94,6 +106,17 @@
 							</a>
 						</div>
 					</form>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-6 mb-3">
+					<label for="latitude" class="form-label">Latitude</label>
+					<input id="latitude" type="text" class="form-control" (input)="eventLatitude.set($any($event.target).value)" [value]="eventLatitude()" placeholder="Optional latitude" />
+				</div>
+				<div class="col-6 mb-3">
+					<label for="longitude" class="form-label">Longitude</label>
+					<input id="longitude" type="text" class="form-control" (input)="eventLongitude.set($any($event.target).value)" [value]="eventLongitude()" placeholder="Optional longitude" />
 				</div>
 			</div>
 		</div>

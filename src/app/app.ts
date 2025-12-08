@@ -7,6 +7,8 @@ import { LoginModal } from './modals/login-modal/login-modal';
 import { SignupModal } from './modals/signup-modal/signup-modal';
 import { UnverifiedEmailModal } from './modals/unverified-email-modal/unverified-email-modal';
 import { Auth } from '@angular/fire/auth';
+import { UserService } from './services/user.service';
+
 
 @Component({
   selector: 'app-root',
@@ -20,6 +22,9 @@ export class App {
   authService = inject(AuthService);
   modalService = inject(ModalService);
   private auth = inject(Auth);
+  private userService = inject(UserService);
+
+  currentUserProfile: { displayName?: string; profilePicture?: string } | null = null;
 
   ngOnInit(): void {
     this.authService.user$.subscribe(user => {
@@ -28,6 +33,10 @@ export class App {
           email: user.email!,
           username: user.displayName!
         })
+        // load profile picture if available
+        this.userService.getUserByUid(user.uid).then(p => {
+          if (p) this.currentUserProfile = { displayName: p.displayName, profilePicture: p.profilePicture };
+        }).catch(() => {});
       }
       else {
         this.authService.currentUserSig.set(null);

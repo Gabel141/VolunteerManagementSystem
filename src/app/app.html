@@ -19,8 +19,9 @@
         </li>
 
         <li *ngIf="authService.currentUserSig()" class="nav-item d-flex align-items-center gap-2">
-          <a class="nav-link" [routerLink]="['/profile', getCurrentUserUid()]" routerLinkActive="active" title="View Profile">
-            <span class="profile-circle">👤</span>
+          <a class="nav-link d-flex align-items-center" [routerLink]="['/profile', getCurrentUserUid()]" routerLinkActive="active" title="View Profile">
+            <img *ngIf="currentUserProfile?.profilePicture" [src]="currentUserProfile?.profilePicture" alt="Profile" class="rounded-circle me-2" style="width:36px;height:36px;object-fit:cover;" />
+            <span *ngIf="!currentUserProfile?.profilePicture" class="profile-circle">👤</span>
           </a>
           <button class="btn btn-nav-logout" (click)="logout()">Logout</button>
         </li>

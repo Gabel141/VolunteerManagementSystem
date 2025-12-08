@@ -6,6 +6,7 @@ import { Auth } from '@angular/fire/auth';
 import { EventService, EventInterface } from '../services/event.service';
 import { EventListComponent } from '../event-list/event-list';
 import { ModalService } from '../services/modal.service';
+import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-events-page',
@@ -18,6 +19,7 @@ export class EventsPage implements OnInit {
   auth = inject(Auth);
   eventService = inject(EventService);
   modalService = inject(ModalService);
+  userService = inject(UserService);
 
   events = signal<EventInterface[]>([]);
   filteredEvents = signal<EventInterface[]>([]);
@@ -36,15 +38,39 @@ export class EventsPage implements OnInit {
   loadEvents() {
     this.eventService.getEvents().subscribe({
       next: (allEvents) => {
-        this.events.set(allEvents);
-        this.filterEvents();
-        this.loadAttendingEventIds();
+        // enrich events with creator profile pictures when missing
+        this.enrichEventsWithCreatorPhotos(allEvents).then(enriched => {
+          this.events.set(enriched);
+          this.filterEvents();
+          this.loadAttendingEventIds();
+        }).catch(err => {
+          console.warn('Failed to enrich events', err);
+          this.events.set(allEvents);
+          this.filterEvents();
+          this.loadAttendingEventIds();
+        });
       },
       error: (error) => {
         console.error('Error loading events:', error);
         this.isLoading.set(false);
       }
     });
+  }
+
+  private async enrichEventsWithCreatorPhotos(events: EventInterface[]): Promise<EventInterface[]> {
+    const uniqueUids = Array.from(new Set(events.map(e => e.creatorUid).filter(Boolean)));
+    const profileCache: Record<string, { profilePicture?: string; displayName?: string }> = {};
+
+    await Promise.all(uniqueUids.map(async uid => {
+      try {
+        const profile = await this.userService.getUserByUid(uid);
+        if (profile) profileCache[uid] = { profilePicture: profile.profilePicture, displayName: profile.displayName };
+      } catch (e) {
+        // ignore per-user failures
+      }
+    }));
+
+    return events.map(e => ({ ...e, creatorProfilePicture: profileCache[e.creatorUid]?.profilePicture || e.creatorProfilePicture, creator: e.creator || profileCache[e.creatorUid]?.displayName || e.creator }));
   }
 
   loadAttendingEventIds() {

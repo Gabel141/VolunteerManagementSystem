@@ -122,5 +122,18 @@
     width: 100%;
     margin-top: 0.5rem;
   }
+
+  /* Make navbar profile image smaller on mobile */
+  .profile-circle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
 }
+
+/* Ensure event cards are full width on small screens */
+.event-card { width: 100%; }
 

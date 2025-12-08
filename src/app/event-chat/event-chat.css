@@ -253,3 +253,32 @@
     padding: 0.2rem 0.35rem;
   }
 }
+
+/* Avatar popover */
+.event-chat .avatar-popover {
+  position: fixed;
+  z-index: 2000;
+}
+.event-chat .popover-card {
+  min-width: 200px;
+}
+
+/* Smooth message transitions and slightly larger bubbles */
+.event-chat .chat-bubble {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.event-chat .chat-message:hover .chat-bubble {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* chat container improvements */
+.event-chat .chat-messages {
+  scroll-behavior: smooth;
+}
+
+/* mobile: make popover full width and anchored bottom */
+@media (max-width: 576px) {
+  .event-chat .avatar-popover { position: fixed; left: 8px !important; right: 8px !important; top: auto !important; bottom: 8px !important; }
+  .event-chat .popover-card { width: auto; }
+}

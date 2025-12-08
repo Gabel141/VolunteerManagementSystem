@@ -18,7 +18,10 @@ import { EventInterface } from '../services/event.service';
           <div class="row">
             <div class="col-md-8 d-flex align-items-start gap-3">
               <a [routerLink]="['/profile', event.creatorUid]" class="d-inline-block">
-                <div class="avatar-placeholder-sm rounded-circle d-inline-flex align-items-center justify-content-center">{{ (event.creator || '?').charAt(0) }}</div>
+                <div class="me-2">
+                  <img *ngIf="event.creatorProfilePicture" [src]="event.creatorProfilePicture" alt="{{ event.creator }}" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;" />
+                  <div *ngIf="!event.creatorProfilePicture" class="avatar-placeholder-sm rounded-circle d-inline-flex align-items-center justify-content-center">{{ (event.creator || '?').charAt(0) }}</div>
+                </div>
               </a>
               <div>
                 <h5 class="card-title text-primary">{{ event.title }}</h5>
@@ -29,6 +32,12 @@ import { EventInterface } from '../services/event.service';
                 </small>
                 <small class="d-block">
                   <strong>📍 Location:</strong> {{ event.location }}
+                </small>
+                <small *ngIf="event.workType" class="d-block">
+                  <strong>🔧 Work:</strong> <span class="badge badge-secondary">{{ event.workType }}</span>
+                </small>
+                <small *ngIf="event.latitude && event.longitude" class="d-block">
+                  <a class="small" target="_blank" rel="noopener" [href]="'https://www.google.com/maps/search/?api=1&query=' + event.latitude + ',' + event.longitude">📍 Open in Maps</a>
                 </small>
                 <small class="d-block">
                   <strong>👤 Creator:</strong> <a [routerLink]="['/profile', event.creatorUid]">{{ event.creator }}</a>

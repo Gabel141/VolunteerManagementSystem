@@ -1,25 +1,30 @@
 import { Component, Input, inject, OnDestroy, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { Firestore, collection, collectionData, addDoc, query, orderBy, limit, doc, updateDoc, deleteDoc, setDoc, getDocs, where, startAfter } from '@angular/fire/firestore';
 import { onSnapshot, serverTimestamp, endBefore, limitToLast, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, Subscription } from 'rxjs';
 import { getDatabase, ref as rtdbRef, onDisconnect, onValue, set as rtdbSet, off as rtdbOff, serverTimestamp as rtdbServerTimestamp } from 'firebase/database';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { UserService } from '../services/user.service';
+import { SenderProfileCacheService } from '../services/sender-profile-cache.service';
 
 const EMOJI_PRESETS = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🚀', '✨'];
 
 @Component({
   selector: 'app-event-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './event-chat.html',
   styleUrls: ['./event-chat.css']
 })
 export class EventChatComponent implements OnDestroy {
   firestore = inject(Firestore);
   auth = inject(Auth);
+  userService = inject(UserService);
+  profileCache = inject(SenderProfileCacheService);
 
   // Expose Object for template use
   Object = Object;
@@ -59,6 +64,47 @@ export class EventChatComponent implements OnDestroy {
     return `events/${this.eventId}/messages`;
   }
 
+  // scroll lock and popover state
+  private autoScrollEnabled = true;
+  popoverVisible = false;
+  popoverData: any = null;
+  popoverStyle: any = { top: '0px', left: '0px' };
+
+  // ensure sender profiles are loaded and messages enriched with senderPhoto/displayName
+  private async ensureSenderProfiles(msgs: any[]) {
+    if (!msgs || !msgs.length) return;
+    const uids = Array.from(new Set(msgs.map(m => m.senderUid).filter(Boolean)));
+    if (!uids.length) return;
+
+    try {
+      const profiles = await this.profileCache.getMany(uids);
+
+      // update messages with any fetched profiles
+      this.messages.update(curr => curr.map(m => {
+        const prof = profiles[m.senderUid];
+        if (prof) {
+          m.senderPhoto = m.senderPhoto || prof.profilePicture || '';
+          m.senderName = m.senderName || prof.displayName || m.senderName;
+        }
+        return m;
+      }));
+
+      // update pending messages
+      this.pendingMessages.update(pm => pm.map(p => {
+        const prof = profiles[p.senderUid];
+        if (prof) {
+          p.senderPhoto = p.senderPhoto || prof.profilePicture || '';
+          p.senderName = p.senderName || prof.displayName || p.senderName;
+        }
+        return p;
+      }));
+
+      if (this.autoScrollEnabled) setTimeout(() => this.scrollToBottom(), 30);
+    } catch (e) {
+      // ignore
+    }
+  }
+
   initMessages() {
     if (this.messagesSub) {
       this.messagesSub.unsubscribe();
@@ -79,10 +125,14 @@ export class EventChatComponent implements OnDestroy {
         const data: any = { id: d.id, ...d.data() };
         if (data?.createdAt && typeof data.createdAt.toDate === 'function') data.createdAt = data.createdAt.toDate();
         if (data?.editedAt && typeof data.editedAt.toDate === 'function') data.editedAt = data.editedAt.toDate();
+        // leave enrichment to ensureSenderProfiles (uses cache/service)
         return data;
       });
 
       this.messages.set(docs.reverse());
+
+      // ensure sender photos for visible messages
+      this.ensureSenderProfiles(this.messages());
 
       const confirmedClientIds = new Set(this.messages().map(m => m.clientId).filter(Boolean));
       this.pendingMessages.update(pm => pm.filter(p => !confirmedClientIds.has(p.clientId)));
@@ -93,7 +143,53 @@ export class EventChatComponent implements OnDestroy {
     });
 
     this.messagesSub = { unsubscribe } as any;
+    // attach scroll listener for sticky-scroll behavior
+    this.attachScrollListener();
     this.initPresenceRTDB();
+  }
+
+  private attachScrollListener() {
+    try {
+      const endEl = document.getElementById(`chat-end-${this.eventId}`);
+      const container = endEl?.parentElement as HTMLElement | null;
+      if (!container) return;
+      container.addEventListener('scroll', this._boundOnScroll = this.onChatScroll.bind(this));
+    } catch (e) {}
+  }
+
+  private detachScrollListener() {
+    try {
+      const endEl = document.getElementById(`chat-end-${this.eventId}`);
+      const container = endEl?.parentElement as HTMLElement | null;
+      if (!container) return;
+      if (this._boundOnScroll) container.removeEventListener('scroll', this._boundOnScroll as any);
+    } catch (e) {}
+  }
+
+  private _boundOnScroll: any = null;
+
+  onChatScroll(ev: any) {
+    try {
+      const target = ev.target as HTMLElement;
+      const atBottom = (target.scrollHeight - target.scrollTop - target.clientHeight) < 60;
+      this.autoScrollEnabled = atBottom;
+    } catch (e) {}
+  }
+
+  showAvatarPopover(uid: string, ev: MouseEvent | TouchEvent) {
+    if (!uid) return;
+    const touch = (ev as TouchEvent).touches && (ev as TouchEvent).touches[0];
+    const x = touch ? touch.clientX : (ev as MouseEvent).clientX;
+    const y = touch ? touch.clientY : (ev as MouseEvent).clientY;
+    this.popoverStyle = { left: (x + 8) + 'px', top: (y + 8) + 'px' };
+    this.popoverVisible = true;
+    this.profileCache.get(uid).then(p => {
+      this.popoverData = p || { uid };
+    }).catch(() => { this.popoverData = { uid }; });
+  }
+
+  hideAvatarPopover() {
+    setTimeout(() => { this.popoverVisible = false; this.popoverData = null; }, 120);
   }
 
   async sendMessage() {
@@ -133,6 +229,14 @@ export class EventChatComponent implements OnDestroy {
         clientId,
         createdAt: serverTimestamp(),
       };
+
+      // attach sender photo if available
+      try {
+        if (this.userService) {
+          const prof = await this.userService.getCurrentUserProfile();
+          if (prof && prof.profilePicture) payload.senderPhoto = prof.profilePicture;
+        }
+      } catch (e) {}
 
       await addDoc(collection(this.firestore, this.messagesColPath()), payload);
       // success: the real-time listener will reconcile the pending message
@@ -402,5 +506,6 @@ export class EventChatComponent implements OnDestroy {
     if (this.messagesSub) this.messagesSub.unsubscribe();
     if (this.presenceSub) this.presenceSub.unsubscribe();
     if (this.rtdbListener) this.rtdbListener();
+    try { this.detachScrollListener(); } catch (e) {}
   }
 }

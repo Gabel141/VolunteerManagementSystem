@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
@@ -8,6 +8,8 @@ import { UserService } from '../services/user.service';
 import { ModalService } from '../services/modal.service';
 import { ParticipantListComponent, Participant } from '../participant-list/participant-list';
 import { EventChatComponent } from '../event-chat/event-chat';
+
+declare const L: any;
 
 @Component({
   selector: 'app-event-details',
@@ -25,6 +27,7 @@ export class EventDetails implements OnInit {
   router = inject(Router);
 
   event = signal<EventInterface | null>(null);
+  creatorProfile: { displayName?: string; profilePicture?: string } | null = null;
   participants = signal<Participant[]>([]);
   loading = signal(true);
   error = signal('');
@@ -32,6 +35,7 @@ export class EventDetails implements OnInit {
   isAttending = signal(false);
   isActionLoading = signal(false);
   currentUserUid: string | undefined;
+  private map: any = null;
 
   ngOnInit() {
     const user = this.auth.currentUser;
@@ -49,6 +53,15 @@ export class EventDetails implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    try {
+      if (this.map) {
+        this.map.remove();
+        this.map = null;
+      }
+    } catch (e) {}
+  }
+
   async loadEvent(eventId: string): Promise<void> {
     this.loading.set(true);
     this.error.set('');
@@ -58,7 +71,20 @@ export class EventDetails implements OnInit {
         this.event.set(loadedEvent);
         this.isCreator.set(loadedEvent.creatorUid === this.currentUserUid);
         this.isAttending.set(loadedEvent.participants?.includes(this.currentUserUid || '') || false);
+        // load creator profile picture if available
+        try {
+          const profile = await this.userService.getUserByUid(loadedEvent.creatorUid);
+          if (profile) {
+            this.creatorProfile = { displayName: profile.displayName, profilePicture: profile.profilePicture };
+          }
+        } catch (e) {
+          console.warn('Failed to load creator profile', e);
+        }
         await this.loadParticipants(eventId);
+        // initialize map if coordinates present (allow 0 values)
+        if (typeof loadedEvent.latitude === 'number' && typeof loadedEvent.longitude === 'number') {
+          setTimeout(() => this.initializeMap(loadedEvent.latitude as number, loadedEvent.longitude as number), 80);
+        }
       } else {
         this.error.set('Event not found.');
       }
@@ -66,6 +92,23 @@ export class EventDetails implements OnInit {
       this.error.set(err?.message ?? 'Failed to load event.');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  private initializeMap(lat: number, lng: number) {
+    try {
+      if (typeof L === 'undefined') return;
+      // cleanup existing
+      if (this.map) { this.map.remove(); this.map = null; }
+      const el = document.getElementById('event-map');
+      if (!el) return;
+      this.map = L.map(el).setView([lat, lng], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(this.map);
+      L.marker([lat, lng]).addTo(this.map);
+    } catch (e) {
+      console.warn('Failed to init map', e);
     }
   }
 
