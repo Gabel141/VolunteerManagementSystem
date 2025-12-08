@@ -25,12 +25,18 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <h2 class="card-title text-primary mb-2">{{ evt.title }}</h2>
-                            <p class="text-muted mb-0">
-                                Created by <strong>{{ evt.creator }}</strong>
-                                <span *ngIf="evt.creatorEmail" class="text-muted">({{ evt.creatorEmail }})</span>
-                            </p>
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="creator-avatar me-2">
+                                <img *ngIf="creatorProfile?.profilePicture" [src]="creatorProfile?.profilePicture" alt="{{ creatorProfile?.displayName }}" class="rounded-circle" style="width:56px;height:56px;object-fit:cover;" />
+                                <div *ngIf="!creatorProfile?.profilePicture" class="avatar-fallback rounded-circle" style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--sunlit-clay),var(--copperwood));color:var(--cornsilk);font-weight:700;">{{ (creatorProfile?.displayName||evt.creator||'?').charAt(0) }}</div>
+                            </div>
+                            <div>
+                                <h2 class="card-title text-primary mb-2">{{ evt.title }}</h2>
+                                <p class="text-muted mb-0">
+                                    Created by <strong>{{ creatorProfile?.displayName || evt.creator }}</strong>
+                                    <span *ngIf="evt.creatorEmail" class="text-muted">({{ evt.creatorEmail }})</span>
+                                </p>
+                            </div>
                         </div>
                         <div *ngIf="isCreator()" class="btn-group" role="group">
                             <button
@@ -65,9 +71,39 @@
                                 <p class="mb-2">
                                     <strong>📍 Location:</strong> {{ evt.location }}
                                 </p>
-                                <p class="mb-2">
-                                    <strong>👥 Participants:</strong> {{ evt.participants?.length || 0 }}
+                                <p *ngIf="evt.workType" class="mb-2">
+                                    <strong>🔧 Work Type:</strong> {{ evt.workType }}
                                 </p>
+                                <p *ngIf="evt.latitude && evt.longitude" class="mb-2">
+                                    <a target="_blank" rel="noopener" [href]="'https://www.google.com/maps/search/?api=1&query=' + evt.latitude + ',' + evt.longitude">Open in Google Maps</a>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>👥 Participants:</strong> {{ getParticipantCountText() }}
+                                    <span *ngIf="isEventFull()" class="badge bg-danger ms-2">Full</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map preview if coordinates present -->
+                    <div *ngIf="evt.latitude && evt.longitude" class="mb-4">
+                        <h5>Location Preview</h5>
+                        <div class="row">
+                            <!-- Leaflet Map -->
+                            <div class="col-12 col-md-6 mb-3">
+                                <div id="event-map" style="width:100%;height:260px;border-radius:8px;overflow:hidden;border:1px solid #ddd;"></div>
+                            </div>
+                            <!-- Google Maps Embedded -->
+                            <div class="col-12 col-md-6 mb-3">
+                                <iframe
+                                    width="100%"
+                                    height="260"
+                                    style="border-radius:8px;border:1px solid #ddd;"
+                                    loading="lazy"
+                                    allowfullscreen=""
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    [src]="'https://www.google.com/maps/embed/v1/place?key=AIzaSyDvBq_sMajKjLjjvFaYxRx8xMXviBNfXrI&q=' + evt.latitude + ',' + evt.longitude"
+                                ></iframe>
                             </div>
                         </div>
                     </div>
@@ -82,10 +118,11 @@
                         <button
                             *ngIf="!isAttending()"
                             (click)="joinEvent()"
-                            [disabled]="isActionLoading()"
+                            [disabled]="isActionLoading() || isEventFull()"
                             class="btn btn-success btn-lg w-100"
                         >
-                            <span *ngIf="!isActionLoading()">✅ Attend Event</span>
+                            <span *ngIf="!isActionLoading() && !isEventFull()">✅ Attend Event</span>
+                            <span *ngIf="isEventFull() && !isActionLoading()">🚫 Event Full</span>
                             <span *ngIf="isActionLoading()">
                                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                 Joining...

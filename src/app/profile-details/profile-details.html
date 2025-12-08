@@ -121,14 +121,21 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Or upload a picture</label>
-              <!--input type="file" class="form-control" accept="image/*" (change)="($event) && uploadProfilePicture($event.target.files[0])" /-->
+              <label class="form-label">Upload Profile Picture</label>
+              <div class="upload-picture-zone">
+                <input type="file" class="form-control" id="pictureUpload" name="pictureUpload" accept="image/*"
+                       (change)="uploadProfilePicture($event.target.files ? $event.target.files[0] : null)" />
+                <small class="text-muted d-block mt-2">Recommended: JPG or PNG, max 5 MB. Image will be cropped to circle.</small>
+              </div>
             </div>
 
-            <div *ngIf="uploadProgress > 0" class="mb-3">
-              <label class="form-label">Upload progress</label>
+            <div *ngIf="uploadProgress > 0 && uploadingPicture" class="mb-3">
+              <label class="form-label">Upload Progress</label>
               <div class="progress">
-                <div class="progress-bar" role="progressbar" [style.width.%]="uploadProgress" aria-valuenow="{{uploadProgress}}" aria-valuemin="0" aria-valuemax="100">{{ uploadProgress }}%</div>
+                <div class="progress-bar progress-bar-animated" role="progressbar" [style.width.%]="uploadProgress"
+                     [attr.aria-valuenow]="uploadProgress" aria-valuemin="0" aria-valuemax="100">
+                  {{ uploadProgress }}%
+                </div>
               </div>
             </div>
 

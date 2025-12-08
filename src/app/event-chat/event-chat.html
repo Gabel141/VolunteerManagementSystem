@@ -11,7 +11,10 @@
       <ng-container *ngFor="let m of (messages().concat(pendingMessages()))">
         <div class="chat-message mb-3" [class.pending]="m.status === 'pending'" [class.failed]="m.status === 'failed'">
           <div [class]="'d-flex align-items-start gap-2 ' + (isCreatorMessage(m) ? 'creator-message' : '')">
-            <div class="chat-avatar">
+            <div class="chat-avatar"
+                 (mouseenter)="showAvatarPopover(m.senderUid, $event)"
+                 (mouseleave)="hideAvatarPopover()"
+                 (click)="showAvatarPopover(m.senderUid, $event)">
               <img *ngIf="m.senderPhoto" [src]="m.senderPhoto" alt="" />
               <div *ngIf="!m.senderPhoto" class="avatar-fallback">{{ (m.senderName || '').charAt(0) }}</div>
             </div>
@@ -75,6 +78,18 @@
       <button class="btn btn-sm btn-primary" type="button" (click)="sendMessage()" [disabled]="loading() || (!newMessage() && !uploading())">Send</button>
     </form>
     <div *ngIf="uploading()" class="small mt-2 text-muted">Uploading: {{uploadProgress()}}%</div>
+    <div class="avatar-popover" *ngIf="popoverVisible" [ngStyle]="popoverStyle">
+      <div class="popover-card p-2 shadow-sm bg-white rounded">
+        <div class="d-flex gap-2 align-items-center">
+          <img *ngIf="popoverData?.profilePicture" [src]="popoverData.profilePicture" class="rounded-circle" style="width:48px;height:48px;object-fit:cover;" />
+          <div>
+            <div class="fw-bold">{{ popoverData?.displayName || popoverData?.uid }}</div>
+            <div class="small text-muted">{{ popoverData?.bio || '' }}</div>
+            <a class="small mt-1 d-inline-block" [routerLink]="['/profile', popoverData?.uid]">View Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

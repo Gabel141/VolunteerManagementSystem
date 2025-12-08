@@ -5,6 +5,7 @@ import { Auth } from '@angular/fire/auth'
 import { Router } from '@angular/router';
 import { ModalService } from '../services/modal.service';
 import { EventService } from '../services/event.service';
+import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-create-events-page',
@@ -18,11 +19,16 @@ export class CreateEventsPage implements OnInit {
   router = inject(Router);
   modalService = inject(ModalService);
   eventService = inject(EventService);
+  userService = inject(UserService);
 
   eventTitle = signal('');
   eventDate = signal('');
   eventTime = signal('');
   eventLocation = signal('');
+  eventLatitude = signal('');
+  eventLongitude = signal('');
+  eventWorkType = signal('');
+  eventMemberCap = signal('');
   eventDescription = signal('');
   isLoading = signal(false);
   errorMessage = signal('');
@@ -56,6 +62,10 @@ export class CreateEventsPage implements OnInit {
     const date = this.eventDate();
     const time = this.eventTime();
     const location = this.eventLocation();
+    const latitude = parseFloat(this.eventLatitude() || '') || undefined;
+    const longitude = parseFloat(this.eventLongitude() || '') || undefined;
+    const workType = this.eventWorkType();
+    const memberCap = this.eventMemberCap() ? parseInt(this.eventMemberCap()) : undefined;
     const description = this.eventDescription();
     const creator = user.displayName || user.email || 'Unknown';
 
@@ -68,14 +78,31 @@ export class CreateEventsPage implements OnInit {
     this.errorMessage.set('');
 
     try {
-      await this.eventService.createEvent({
+      // try to include creator profile picture when creating the event
+      let creatorProfilePicture: string | undefined = undefined;
+      try {
+        const profile = await this.userService.getCurrentUserProfile();
+        if (profile && profile.profilePicture) creatorProfilePicture = profile.profilePicture;
+      } catch (e) {
+        // ignore
+      }
+
+      // Build event object, excluding undefined fields to avoid Firestore errors
+      const eventData: any = {
         title,
         date,
         time,
         location,
         description,
-        creator
-      });
+        creator,
+      };
+      if (creatorProfilePicture) eventData.creatorProfilePicture = creatorProfilePicture;
+      if (latitude !== undefined) eventData.latitude = latitude;
+      if (longitude !== undefined) eventData.longitude = longitude;
+      if (workType) eventData.workType = workType;
+      if (memberCap !== undefined) eventData.memberCap = memberCap;
+
+      await this.eventService.createEvent(eventData);
 
       // Clear form
       this.eventTitle.set('');
@@ -83,6 +110,8 @@ export class CreateEventsPage implements OnInit {
       this.eventTime.set('');
       this.eventLocation.set('');
       this.eventDescription.set('');
+      this.eventMemberCap.set('');
+      this.eventWorkType.set('');
 
       // Navigate to events page
       this.router.navigate(['/events']);
