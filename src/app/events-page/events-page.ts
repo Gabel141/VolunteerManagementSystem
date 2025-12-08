@@ -32,9 +32,6 @@ export class EventsPage implements OnInit {
     const user = this.auth.currentUser;
     this.currentUserUid = user?.uid;
     this.loadEvents();
-
-    
-
   }
 
   loadEvents() {
@@ -43,12 +40,12 @@ export class EventsPage implements OnInit {
         // enrich events with creator profile pictures when missing
         this.enrichEventsWithCreatorPhotos(allEvents).then(enriched => {
           this.events.set(enriched);
-          this.filterEvents();
+          this.filterEvents(); // Trigger filter after setting events
           this.loadAttendingEventIds();
         }).catch(err => {
           console.warn('Failed to enrich events', err);
           this.events.set(allEvents);
-          this.filterEvents();
+          this.filterEvents(); // Trigger filter on error too
           this.loadAttendingEventIds();
         });
       },

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Firestore, collection, collectionData, addDoc, query, orderBy, limit, doc, updateDoc, deleteDoc, setDoc, getDocs, where, startAfter } from '@angular/fire/firestore';
-import { onSnapshot, serverTimestamp, endBefore, limitToLast, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
+import { onSnapshot, serverTimestamp, endBefore, limitToLast, arrayUnion, arrayRemove, getDoc, runTransaction } from 'firebase/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, Subscription } from 'rxjs';
 import { getDatabase, ref as rtdbRef, onDisconnect, onValue, set as rtdbSet, off as rtdbOff, serverTimestamp as rtdbServerTimestamp } from 'firebase/database';
@@ -301,16 +301,32 @@ export class EventChatComponent implements OnDestroy {
     this.showEmojiPicker.set(false);
     const msgRef = doc(this.firestore, `${this.messagesColPath()}/${messageId}`);
     try {
-      const snap = await getDoc(msgRef as any);
-      const data: any = snap.exists() ? snap.data() : {};
-      const reactions = data?.reactions || {};
-      const usersForEmoji: string[] = reactions[emoji] || [];
-      const hasReacted = usersForEmoji.includes(user.uid);
-      if (hasReacted) {
-        await updateDoc(msgRef, { [`reactions.${emoji}`]: arrayRemove(user.uid) } as any);
-      } else {
-        await updateDoc(msgRef, { [`reactions.${emoji}`]: arrayUnion(user.uid) } as any);
-      }
+      // Use transaction to avoid race conditions and duplicates
+      await runTransaction(this.firestore as any, async (transaction: any) => {
+        const snap = await transaction.get(msgRef);
+        const data: any = snap.exists() ? snap.data() : {};
+        const reactions = data?.reactions || {};
+        const usersForEmoji: string[] = reactions[emoji] || [];
+        const hasReacted = usersForEmoji.includes(user.uid);
+
+        if (hasReacted) {
+          // Remove user from reaction
+          const updated = usersForEmoji.filter((uid: string) => uid !== user.uid);
+          if (updated.length === 0) {
+            // Delete the emoji key entirely if no users left
+            const newReactions = { ...reactions };
+            delete newReactions[emoji];
+            transaction.update(msgRef, { reactions: newReactions });
+          } else {
+            // Keep the emoji with remaining users
+            transaction.update(msgRef, { [`reactions.${emoji}`]: updated });
+          }
+        } else {
+          // Add user to reaction
+          const updated = [...usersForEmoji, user.uid];
+          transaction.update(msgRef, { [`reactions.${emoji}`]: updated });
+        }
+      });
     } catch (e) {
       console.error('Reaction toggle failed', e);
     }
@@ -481,12 +497,17 @@ export class EventChatComponent implements OnDestroy {
       const presenceRef = rtdbRef(db, `presence/${this.eventId}/${user.uid}`);
       const connectedRef = rtdbRef(db, '.info/connected');
 
-      // When connected, write presence and ensure it's removed on disconnect
+      // Write presence immediately when component initializes
+      rtdbSet(presenceRef, { displayName: user.displayName || user.email || '' }).catch(() => {});
+
+      // Ensure presence is removed on disconnect
+      onDisconnect(presenceRef).remove().catch(() => {});
+
+      // Also listen to connected state to re-establish presence if connection drops/recovers
       const connectedListener = (snap: any) => {
         if (snap.val() === true) {
-          // write a small object (can be extended with lastSeen)
+          // Re-write presence when reconnected
           rtdbSet(presenceRef, { displayName: user.displayName || user.email || '' }).catch(() => {});
-          onDisconnect(presenceRef).remove().catch(() => {});
         }
       };
       onValue(connectedRef, connectedListener);
