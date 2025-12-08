@@ -31,8 +31,8 @@ import { EventInterface } from '../services/event.service';
                   <strong>📍 Location:</strong> {{ event.location }}
                 </small>
                 <small class="d-block">
-                  <strong>👤 Creator:</strong> <a [routerLink]="['/profile', event.creatorUid]">{{ event.creator }}</a>
-                  <span *ngIf="event.creatorEmail" class="text-muted">({{ event.creatorEmail }})</span>
+                  <strong>👤 Creator:</strong> <a [routerLink]="['/profile', event.creatorUid]"> {{ event.creator }}</a>
+                  <span *ngIf="event.creatorEmail" class="text-muted"> ({{ event.creatorEmail }})</span>
                 </small>
                 <small class="d-block">
                   <strong>👥 Participants:</strong> {{ event.participants?.length || 0 }}
@@ -40,13 +40,15 @@ import { EventInterface } from '../services/event.service';
               </div>
             </div>
             <div class="col-md-4 d-flex align-items-center justify-content-end">
-              <div class="btn-group-vertical w-100" role="group">
+              <div *ngIf="this.currentUserUid" class="btn-group-vertical w-100" role="group">
                 <button
                   class="btn btn-outline-primary btn-sm"
                   [routerLink]="['/event-details', event.id]"
                 >
                   View Details
                 </button>
+
+                @if (this.currentUserUid) {
                 <button
                   *ngIf="!isCreator(event)"
                   (click)="onAttendClick(event)"
@@ -56,6 +58,7 @@ import { EventInterface } from '../services/event.service';
                 >
                   {{ isAttending(event) ? 'Leave Event' : 'Attend' }}
                 </button>
+
                 <button
                   *ngIf="isCreator(event)"
                   class="btn btn-warning btn-sm text-dark"
@@ -70,6 +73,8 @@ import { EventInterface } from '../services/event.service';
                 >
                   Delete
                 </button>
+                }
+
               </div>
             </div>
           </div>
@@ -95,6 +100,9 @@ import { EventInterface } from '../services/event.service';
     .btn-group-vertical {
       gap: 5px;
     }
+    small.d-block a {
+      text-decoration: none;
+    }
   `]
 })
 export class EventListComponent {
@@ -105,6 +113,7 @@ export class EventListComponent {
   @Input() onAttend?: (event: EventInterface) => void;
   @Input() onLeave?: (event: EventInterface) => void;
   @Input() onDelete?: (event: EventInterface) => void;
+
 
   isCreator(event: EventInterface): boolean {
     return event.creatorUid === this.currentUserUid;

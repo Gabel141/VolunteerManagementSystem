@@ -29,8 +29,10 @@ export class EventsPage implements OnInit {
   ngOnInit() {
     const user = this.auth.currentUser;
     this.currentUserUid = user?.uid;
-
     this.loadEvents();
+
+    
+
   }
 
   loadEvents() {

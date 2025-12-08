@@ -48,6 +48,10 @@
 	color: var(--olive-leaf);
 }
 
+h2 {
+	color: red;
+}
+
 @media (max-width: 576px) {
 	.list-header { font-size: 0.95rem; }
 }
