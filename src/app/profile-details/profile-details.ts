@@ -1,17 +1,18 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, collection, doc, getDoc, setDoc, updateDoc } from '@angular/fire/firestore';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 import { ModalService } from '../services/modal.service';
+import { EventService, EventInterface } from '../services/event.service';
 
 @Component({
   selector: 'app-profile-details',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './profile-details.html',
   styleUrls: ['./profile-details.css'],
 })
@@ -22,6 +23,7 @@ export class ProfileDetails implements OnInit {
   router = inject(Router);
   route = inject(ActivatedRoute);
   modalService = inject(ModalService);
+  eventService = inject(EventService);
 
   // Profile fields
   displayName = '';
@@ -40,6 +42,9 @@ export class ProfileDetails implements OnInit {
   viewedUid: string | null = null;
   // Whether the profile shown belongs to the logged-in user
   isOwner = false;
+
+  // Events created by this user
+  eventsCreated: EventInterface[] = [];
 
   ngOnInit() {
     // Read route param 'uid' if present
@@ -81,6 +86,24 @@ export class ProfileDetails implements OnInit {
         } else {
           this.error = 'Profile not found.';
         }
+      }
+      // Load created events for this profile
+      try {
+        if (uidToLoad) {
+          // If viewing own profile use getMyEvents (keeps realtime for owner), otherwise query by creator uid
+          const events$ = this.isOwner ? this.eventService.getMyEvents() : this.eventService.getEventsByCreator(uidToLoad);
+          events$.subscribe(list => {
+            // Sort by createdAt descending if available
+            this.eventsCreated = (list || []).slice().sort((a, b) => {
+              const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+              const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+              return tb - ta;
+            });
+          });
+        }
+      } catch (e) {
+        // non-fatal
+        console.warn('Failed to load created events', e);
       }
     } catch (err: any) {
       this.error = err?.message ?? 'Failed to load profile.';

@@ -84,6 +84,15 @@ export class EventService {
   }
 
   /**
+   * Get events created by a specific user (by uid)
+   */
+  getEventsByCreator(uid: string): Observable<EventInterface[]> {
+    const eventsCollection = collection(this.firestore, 'events');
+    const q = query(eventsCollection, where('creatorUid', '==', uid));
+    return collectionData(q, { idField: 'id' }) as Observable<EventInterface[]>;
+  }
+
+  /**
    * Get events user is attending
    */
   getEventsAttending(): Observable<EventInterface[]> {

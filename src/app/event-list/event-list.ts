@@ -17,12 +17,12 @@ import { EventInterface } from '../services/event.service';
         <div class="card-body">
           <div class="row">
             <div class="col-md-8 d-flex align-items-start gap-3">
-              <a [routerLink]="['/profile', event.creatorUid]\" class=\"d-inline-block\">
-                <div class=\"avatar-placeholder-sm rounded-circle d-inline-flex align-items-center justify-content-center\">{{ (event.creator || '?').charAt(0) }}</div>
+              <a [routerLink]="['/profile', event.creatorUid]" class="d-inline-block">
+                <div class="avatar-placeholder-sm rounded-circle d-inline-flex align-items-center justify-content-center">{{ (event.creator || '?').charAt(0) }}</div>
               </a>
               <div>
                 <h5 class="card-title text-primary">{{ event.title }}</h5>
-              <p class="card-text text-muted">{{ event.description }}</p>
+                <p class="card-text text-muted">{{ (event.description || '') | slice:0:180 }}<span *ngIf="(event.description || '').length>180">…</span></p>
               <div class="event-meta">
                 <small class="d-block">
                   <strong>📅 Date:</strong> {{ event.date }} at {{ event.time }}
@@ -79,7 +79,7 @@ import { EventInterface } from '../services/event.service';
   `,
   styles: [`
     .event-card {
-      border-left: 4px solid #007bff;
+      border-left: 4px solid var(--sunlit-clay);
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .event-card:hover {

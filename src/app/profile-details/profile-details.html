@@ -55,6 +55,30 @@
                 <button type="button" class="btn btn-edit" (click)="toggleEdit()">Edit Profile</button>
                 <button type="button" class="btn btn-cancel" (click)="logout()">Logout</button>
             </div>
+
+            <!-- Created Events -->
+            <div class="mt-4">
+              <h5 class="mb-3">Events created by {{ displayName || 'this user' }}</h5>
+              <div *ngIf="eventsCreated.length === 0" class="alert alert-info">No events created yet.</div>
+
+              <div class="row g-3">
+                <div *ngFor="let evt of eventsCreated" class="col-12 col-md-6">
+                  <div class="card">
+                    <div class="card-body d-flex flex-column">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="card-title mb-1 text-truncate">{{ evt.title }}</h6>
+                        <small class="text-muted">{{ evt.date }} · {{ evt.time }}</small>
+                      </div>
+                      <p class="card-text text-muted mb-3">{{ (evt.description || '') | slice:0:140 }}<span *ngIf="(evt.description || '').length>140">…</span></p>
+                      <div class="mt-auto d-flex gap-2">
+                        <a [routerLink]="['/event-details', evt.id]" class="btn btn-sm btn-primary">View Details</a>
+                        <a *ngIf="isOwner" [routerLink]="['/event-details', evt.id]" class="btn btn-sm btn-outline-secondary">Manage</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Edit Mode -->
