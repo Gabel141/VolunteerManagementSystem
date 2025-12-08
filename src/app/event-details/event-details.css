@@ -194,6 +194,25 @@ iframe[src*="google.com/maps"]:hover {
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
 }
 
+.btn-warning {
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-warning:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(221, 161, 94, 0.2);
+}
+
+/* Creator action buttons - mobile friendly */
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  touch-action: manipulation;
+  user-select: none;
+}
+
 /* Responsive map layout */
 @media (max-width: 768px) {
   .event-meta p {
@@ -203,5 +222,10 @@ iframe[src*="google.com/maps"]:hover {
   #event-map,
   iframe[src*="google.com/maps"] {
     height: 220px !important;
+  }
+
+  /* Ensure buttons are full width on mobile if needed */
+  .btn-sm {
+    min-width: 100px;
   }
 }

@@ -38,22 +38,26 @@
                                 </p>
                             </div>
                         </div>
-                        <div *ngIf="isCreator()" class="btn-group" role="group">
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-warning text-dark"
-                                (click)="editEvent()"
-                            >
-                                ✏️ Edit
-                            </button>
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-danger"
-                                (click)="deleteEvent()"
-                                [disabled]="isActionLoading()"
-                            >
-                                🗑️ Delete
-                            </button>
+                        <div *ngIf="isCreator()" class="mt-2 mt-lg-0">
+                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                <button
+                                    type="button"
+                                    class="btn btn-warning text-dark btn-sm"
+                                    (click)="editEvent()"
+                                    style="white-space: nowrap;"
+                                >
+                                    ✏️ Edit
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm"
+                                    (click)="deleteEvent()"
+                                    [disabled]="isActionLoading()"
+                                    style="white-space: nowrap;"
+                                >
+                                    🗑️ Delete
+                                </button>
+                            </div>
                         </div>
                     </div>
 

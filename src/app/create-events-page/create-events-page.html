@@ -63,15 +63,21 @@
 							</div>
 
 							<div class="col-md-6 mb-3">
-								<label for="date" class="form-label">Date *</label>
+								<label for="date" class="form-label">Date * <span class="text-muted" style="font-size: 0.875rem;">(cannot be in the past)</span></label>
 								<input
 									id="date"
 									type="date"
 									class="form-control"
+									[class.is-invalid]="dateError()"
 									required
-									(input)="eventDate.set($any($event.target).value)"
+									(input)="eventDate.set($any($event.target).value); validateEventDate()"
+									(change)="validateEventDate()"
 									[value]="eventDate()"
+									[min]="getTodayDate()"
 								/>
+								<div class="invalid-feedback d-block" *ngIf="dateError()">
+									{{ dateError() }}
+								</div>
 							</div>
 
 							<div class="col-md-6 mb-3">
@@ -106,7 +112,7 @@
 								type="button"
 								(click)="createEvent()"
 								class="btn btn-primary btn-lg"
-								[disabled]="isLoading()"
+								[disabled]="isLoading() || dateError() !== ''"
 							>
 								<span *ngIf="!isLoading()">✅ Create Event</span>
 								<span *ngIf="isLoading()">

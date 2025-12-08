@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '@angular/fire/auth'
-import { Router } from '@angular/router';
+import { RouterModule,Router } from '@angular/router';
 import { ModalService } from '../services/modal.service';
 import { EventService } from '../services/event.service';
 import { UserService } from '../services/user.service';
@@ -10,7 +10,7 @@ import { UserService } from '../services/user.service';
 @Component({
   selector: 'app-create-events-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './create-events-page.html',
   styleUrls: ['./create-events-page.css'],
 })
@@ -32,6 +32,7 @@ export class CreateEventsPage implements OnInit {
   eventDescription = signal('');
   isLoading = signal(false);
   errorMessage = signal('');
+  dateError = signal('');
 
   ngOnInit() {
     const user = this.auth.currentUser;
@@ -43,6 +44,37 @@ export class CreateEventsPage implements OnInit {
     if (!user.emailVerified) {
       this.modalService.openModal('unverified-email');
     }
+  }
+
+  // Get today's date in YYYY-MM-DD format for date input min attribute
+  getTodayDate(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Validate that the selected date is not in the past
+  validateEventDate(): boolean {
+    const selectedDate = this.eventDate();
+    if (!selectedDate) {
+      this.dateError.set('');
+      return true;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDate = new Date(selectedDate);
+    eventDate.setHours(0, 0, 0, 0);
+
+    if (eventDate < today) {
+      this.dateError.set('Event date cannot be in the past');
+      return false;
+    }
+
+    this.dateError.set('');
+    return true;
   }
 
   async createEvent() {
@@ -70,7 +102,12 @@ export class CreateEventsPage implements OnInit {
     const creator = user.displayName || user.email || 'Unknown';
 
     if (!title || !date || !time || !location || !description) {
-      this.errorMessage.set('Please fill in all fields');
+      this.errorMessage.set('Please fill in all required fields');
+      return;
+    }
+
+    // Validate that event date is not in the past
+    if (!this.validateEventDate()) {
       return;
     }
 

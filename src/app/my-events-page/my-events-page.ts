@@ -22,14 +22,26 @@ import { EventListComponent } from '../event-list/event-list';
         <p class="mb-0">Please verify your email to manage your events.</p>
       </div>
 
-      <div *ngIf="isLoading" class="text-center">
+      <div *ngIf="isLoading" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
+        <p class="text-muted mt-3">Loading your events...</p>
+      </div>
+
+      <div *ngIf="!isLoading && myEvents().length === 0 && isVerified" class="text-center py-5">
+        <div class="mb-4">
+          <span style="font-size: 3rem;">📭</span>
+        </div>
+        <h4 class="text-muted">No Events Yet</h4>
+        <p class="text-muted mb-4">You haven't created any events. Start by creating your first volunteer event!</p>
+        <button class="btn btn-primary btn-lg" routerLink="/create-event">
+          ➕ Create Your First Event
+        </button>
       </div>
 
       <app-event-list
-        *ngIf="!isLoading"
+        *ngIf="!isLoading && myEvents().length > 0"
         [events]="myEvents()"
         [currentUserUid]="currentUserUid"
         [attendingEventIds]="attendingEventIds()"
@@ -80,9 +92,11 @@ export class MyEventsPage implements OnInit {
   }
 
   loadEvents() {
+    // Get events created by the user
     this.eventService.getMyEvents().subscribe({
       next: (events) => {
         this.myEvents.set(events);
+        // Load attending event IDs after my events
         this.loadAttendingEventIds();
       },
       error: (error) => {
@@ -93,6 +107,7 @@ export class MyEventsPage implements OnInit {
   }
 
   loadAttendingEventIds() {
+    // Get all events to find which ones this user is attending (excluding ones they created)
     this.eventService.getEventsAttending().subscribe({
       next: (events) => {
         this.attendingEventIds.set(events.map(e => e.id || ''));
@@ -100,6 +115,7 @@ export class MyEventsPage implements OnInit {
       },
       error: (error) => {
         console.error('Error loading attending events:', error);
+        // Still mark as loaded even if error occurs
         this.isLoading.set(false);
       }
     });

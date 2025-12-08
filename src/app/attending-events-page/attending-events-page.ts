@@ -22,14 +22,26 @@ import { EventListComponent } from '../event-list/event-list';
         <p class="mb-0">Please verify your email to attend events.</p>
       </div>
 
-      <div *ngIf="isLoading" class="text-center">
+      <div *ngIf="isLoading" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
+        <p class="text-muted mt-3">Loading your events...</p>
+      </div>
+
+      <div *ngIf="!isLoading && attendingEvents().length === 0 && isVerified" class="text-center py-5">
+        <div class="mb-4">
+          <span style="font-size: 3rem;">🔍</span>
+        </div>
+        <h4 class="text-muted">No Events Yet</h4>
+        <p class="text-muted mb-4">You haven't joined any events yet. Explore and find events that match your interests!</p>
+        <button class="btn btn-primary btn-lg" routerLink="/events">
+          👀 Browse Events
+        </button>
       </div>
 
       <app-event-list
-        *ngIf="!isLoading"
+        *ngIf="!isLoading && attendingEvents().length > 0"
         [events]="attendingEvents()"
         [currentUserUid]="currentUserUid"
         [attendingEventIds]="attendingEventIds()"
