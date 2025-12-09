@@ -15,8 +15,6 @@ export interface EventInterface {
   creatorUid: string;
   creatorEmail?: string;
   creatorProfilePicture?: string;
-  latitude?: number;
-  longitude?: number;
   workType?: string;
   memberCap?: number;
   participants?: string[];
@@ -189,7 +187,7 @@ export class EventService {
     }
 
     const participants = event.participants || [];
-    
+
     // Check member cap if set
     if (event.memberCap && participants.length >= event.memberCap) {
       throw new Error(`Event is full (${event.memberCap} participants)`);

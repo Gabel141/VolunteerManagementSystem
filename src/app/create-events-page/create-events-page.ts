@@ -30,8 +30,6 @@ export class CreateEventsPage implements OnInit {
   eventDate = signal('');
   eventTime = signal('');
   eventLocation = signal('');
-  eventLatitude = signal('');
-  eventLongitude = signal('');
   eventWorkType = signal('');
   eventMemberCap = signal('');
   eventDescription = signal('');
@@ -70,8 +68,7 @@ export class CreateEventsPage implements OnInit {
         this.eventLocation.set(event.location);
         this.eventDate.set(this.formatDateForInput(event.date));
         this.eventTime.set(event.time);
-        if (event.latitude) this.eventLatitude.set(event.latitude.toString());
-        if (event.longitude) this.eventLongitude.set(event.longitude.toString());
+        // latitude/longitude removed from edit form (data preserved in DB)
         if (event.workType) this.eventWorkType.set(event.workType);
         if (event.memberCap) this.eventMemberCap.set(event.memberCap.toString());
       } else {
@@ -141,8 +138,7 @@ export class CreateEventsPage implements OnInit {
     const date = new Date(this.eventDate());
     const time = this.eventTime();
     const location = this.eventLocation();
-    const latitude = parseFloat(this.eventLatitude() || '') || undefined;
-    const longitude = parseFloat(this.eventLongitude() || '') || undefined;
+    // latitude/longitude removed from form input
     const workType = this.eventWorkType();
     const memberCap = this.eventMemberCap() ? parseInt(this.eventMemberCap()) : undefined;
     const description = this.eventDescription();
@@ -186,8 +182,7 @@ export class CreateEventsPage implements OnInit {
         creator,
       };
       if (creatorProfilePicture) eventData.creatorProfilePicture = creatorProfilePicture;
-      if (latitude !== undefined) eventData.latitude = latitude;
-      if (longitude !== undefined) eventData.longitude = longitude;
+      // coordinates intentionally not set via UI
       if (workType) eventData.workType = workType;
       if (memberCap !== undefined) eventData.memberCap = memberCap;
 

@@ -133,16 +133,7 @@
 				</div>
 			</div>
 
-			<div class="row">
-				<div class="col-6 mb-3">
-					<label for="latitude" class="form-label">Latitude</label>
-					<input id="latitude" type="text" class="form-control" (input)="eventLatitude.set($any($event.target).value)" [value]="eventLatitude()" placeholder="Optional latitude" />
-				</div>
-				<div class="col-6 mb-3">
-					<label for="longitude" class="form-label">Longitude</label>
-					<input id="longitude" type="text" class="form-control" (input)="eventLongitude.set($any($event.target).value)" [value]="eventLongitude()" placeholder="Optional longitude" />
-				</div>
-			</div>
+			<!-- Latitude/Longitude inputs removed: coordinates are no longer collected from users -->
 		</div>
 	</div>
 </div>

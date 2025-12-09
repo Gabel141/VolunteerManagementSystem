@@ -9,8 +9,6 @@ import { ModalService } from '../services/modal.service';
 import { ParticipantListComponent, Participant } from '../participant-list/participant-list';
 import { EventChatComponent } from '../event-chat/event-chat';
 
-declare const L: any;
-
 @Component({
   selector: 'app-event-details',
   standalone: true,
@@ -35,7 +33,7 @@ export class EventDetails implements OnInit {
   isAttending = signal(false);
   isActionLoading = signal(false);
   currentUserUid: string | undefined;
-  private map: any = null;
+  // Map functionality removed; coordinates still stored in DB but not used in UI
 
   ngOnInit() {
     const user = this.auth.currentUser;
@@ -54,12 +52,7 @@ export class EventDetails implements OnInit {
   }
 
   ngOnDestroy() {
-    try {
-      if (this.map) {
-        this.map.remove();
-        this.map = null;
-      }
-    } catch (e) {}
+    // no-op (map removed)
   }
 
   async loadEvent(eventId: string): Promise<void> {
@@ -81,10 +74,7 @@ export class EventDetails implements OnInit {
           console.warn('Failed to load creator profile', e);
         }
         await this.loadParticipants(eventId);
-        // initialize map if coordinates present (allow 0 values)
-        if (typeof loadedEvent.latitude === 'number' && typeof loadedEvent.longitude === 'number') {
-          setTimeout(() => this.initializeMap(loadedEvent.latitude as number, loadedEvent.longitude as number), 80);
-        }
+        // Coordinates present in event are preserved in the data model but map previews were removed
       } else {
         this.error.set('Event not found.');
       }
@@ -95,22 +85,7 @@ export class EventDetails implements OnInit {
     }
   }
 
-  private initializeMap(lat: number, lng: number) {
-    try {
-      if (typeof L === 'undefined') return;
-      // cleanup existing
-      if (this.map) { this.map.remove(); this.map = null; }
-      const el = document.getElementById('event-map');
-      if (!el) return;
-      this.map = L.map(el).setView([lat, lng], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(this.map);
-      L.marker([lat, lng]).addTo(this.map);
-    } catch (e) {
-      console.warn('Failed to init map', e);
-    }
-  }
+  // initializeMap removed
 
   async loadParticipants(eventId: string): Promise<void> {
     try {

@@ -139,24 +139,7 @@
 }
 
 /* Map container improvements */
-#event-map {
-  box-shadow: 0 2px 8px rgba(40, 54, 24, 0.1);
-  transition: box-shadow 0.3s ease;
-}
-
-#event-map:hover {
-  box-shadow: 0 4px 16px rgba(40, 54, 24, 0.15);
-}
-
-/* Google Maps iframe styling */
-iframe[src*="google.com/maps"] {
-  box-shadow: 0 2px 8px rgba(40, 54, 24, 0.1);
-  transition: box-shadow 0.3s ease;
-}
-
-iframe[src*="google.com/maps"]:hover {
-  box-shadow: 0 4px 16px rgba(40, 54, 24, 0.15);
-}
+/* Map styles removed (maps feature deprecated in UI) */
 
 /* Button state improvements */
 .btn:disabled {
@@ -219,10 +202,7 @@ iframe[src*="google.com/maps"]:hover {
     font-size: 0.95rem;
   }
 
-  #event-map,
-  iframe[src*="google.com/maps"] {
-    height: 220px !important;
-  }
+  /* map-related responsive rules removed */
 
   /* Ensure buttons are full width on mobile if needed */
   .btn-sm {

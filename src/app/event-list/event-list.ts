@@ -55,11 +55,7 @@ import { EventInterface } from '../services/event.service';
                   <strong>👤 Creator:</strong> <a [routerLink]="['/profile', event.creatorUid]" class="text-decoration-none"> {{ event.creator }}</a>
                 </small>
               </div>
-              <div class="col" *ngIf="event.latitude && event.longitude">
-                <small class="d-block">
-                  <a class="text-decoration-none" target="_blank" rel="noopener" [href]="'https://www.google.com/maps/search/?api=1&query=' + event.latitude + ',' + event.longitude">📍 Open in Maps</a>
-                </small>
-              </div>
+              <!-- Map links removed: coordinates are no longer used in UI -->
             </div>
           </div>
 
