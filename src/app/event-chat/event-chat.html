@@ -84,10 +84,6 @@
     <form class="chat-input d-flex gap-2 align-items-center" (submit)="$event.preventDefault(); sendMessage();">
       <input class="form-control form-control-sm flex-grow-1" placeholder="Write a message..." [(ngModel)]="newMessage" name="message" />
 
-      <!-- Hidden file input + stylized label/button -->
-      <input id="chat-file-input-{{eventId}}" type="file" hidden (change)="uploadAttachment($event.target.files && $event.target.files[0])" />
-      <label for="chat-file-input-{{eventId}}" class="btn btn-sm btn-outline-secondary attach-btn mb-0" title="Attach file">📎</label>
-
       <button class="btn btn-sm btn-primary" type="button" (click)="sendMessage()" [disabled]="loading() || (!newMessage() && !uploading())">Send</button>
     </form>
     <div *ngIf="uploading()" class="small mt-2 text-muted">Uploading: {{uploadProgress()}}%</div>
